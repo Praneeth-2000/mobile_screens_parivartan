@@ -4,6 +4,7 @@ import styles from './MiddleCards.module.css';
 import groupIcon from '../assets/logos/Group Icon.png';
 import seoIcon from '../assets/logos/Seo.png';
 import statsIcon from '../assets/logos/Stats Icon.png';
+import seoTitleImage from '../assets/images/seo_title_image.png';
 
 export const SeoCard = () => {
   const features = [
@@ -16,18 +17,9 @@ export const SeoCard = () => {
     <div className={styles.cardContainer}>
       <h2 className={styles.sectionTitle}>seo</h2>
       
-      {/* Simple SEO Illustration */}
+      {/* SEO Illustration */}
       <div className={styles.illustrationWrapper}>
-        <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="40" cy="40" r="38" fill="url(#seo-grad)" stroke="#505FAA" strokeWidth="2"/>
-          <text x="40" y="48" textAnchor="middle" fill="white" fontFamily="Caveat" fontSize="24" fontWeight="600">SEO</text>
-          <defs>
-            <linearGradient id="seo-grad" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#505FAA"/>
-              <stop offset="1" stopColor="#2C3C91"/>
-            </linearGradient>
-          </defs>
-        </svg>
+        <img src={seoTitleImage} alt="SEO" className={styles.illustration} />
       </div>
 
       {/* Feature Cards */}
