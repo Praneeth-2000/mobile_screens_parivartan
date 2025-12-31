@@ -1,0 +1,261 @@
+/* Styles for swipeable middle cards */
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Inter:wght@400;500;600&family=Mulish:wght@400&display=swap');
+
+/* Card container */
+.cardContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 15px;
+  padding: 10px 0;
+}
+
+/* Accent text (digital marketing) */
+.accentText {
+  font-family: 'Caveat', cursive;
+  font-weight: 600;
+  font-size: 26px;
+  color: #ff6b3d;
+  margin: 0;
+  text-align: center;
+}
+
+/* Section titles */
+.sectionTitle {
+  font-family: 'Caveat', cursive;
+  font-weight: 600;
+  font-size: 28px;
+  color: #ff6b3d;
+  margin: 0;
+  text-align: center;
+  text-transform: lowercase;
+}
+
+/* Illustration wrapper */
+.illustrationWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px 0;
+}
+
+.illustration {
+  width: 100%;
+  max-width: 200px;
+  height: auto;
+}
+
+/* Client Logo Carousel */
+.carouselContainer {
+  width: 100%;
+  height: 300px;
+  position: relative;
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+}
+
+.carouselTrack {
+  position: absolute;
+  width: 1200px;
+  height: 100%;
+  left: 50%;
+  top: 30px;
+  transform: translateX(-50%);
+  perspective: 1000px;
+}
+
+.logoCard {
+  background: #fff;
+  border-radius: 20px;
+  padding: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 70px;
+  height: 70px;
+  position: absolute;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  offset-rotate: 0deg;
+}
+
+.topCard {
+  offset-path: path("M 1100 200 C 900 40, 300 40, 100 200");
+  animation: slideTop 25s linear infinite;
+  animation-delay: calc(25s / var(--total) * var(--index) * -1);
+}
+
+.bottomCard {
+  offset-path: path("M 1100 300 C 900 160, 300 160, 100 300");
+  animation: slideBottom 20s linear infinite;
+  animation-delay: calc(20s / var(--total) * var(--index) * -1);
+}
+
+@keyframes slideTop {
+  0% { offset-distance: 0%; transform: scale(0.7); opacity: 0; }
+  15% { opacity: 0.5; }
+  50% { offset-distance: 50%; transform: scale(1.2); opacity: 1; box-shadow: 0 15px 40px rgba(0,0,0,0.12); z-index: 50; }
+  85% { opacity: 0.5; }
+  100% { offset-distance: 100%; transform: scale(0.7); opacity: 0; }
+}
+
+@keyframes slideBottom {
+  0% { offset-distance: 0%; transform: scale(0.75); opacity: 0; }
+  15% { opacity: 0.4; }
+  50% { offset-distance: 50%; transform: scale(1.1); opacity: 1; box-shadow: 0 12px 30px rgba(0,0,0,0.08); z-index: 40; }
+  85% { opacity: 0.4; }
+  100% { offset-distance: 100%; transform: scale(0.75); opacity: 0; }
+}
+
+.logoCard:hover {
+  transform: scale(1.3) !important;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+  z-index: 100;
+}
+
+.logoImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.logoPlaceholder {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 11px;
+  color: #8ed5a8;
+  text-align: center;
+}
+
+/* Feature Carousel */
+.featureCarousel {
+  width: 100%;
+  overflow: hidden;
+  padding: 10px 0;
+}
+
+.featureTrack {
+  display: flex;
+  gap: 12px;
+  animation: featureScroll 18s linear infinite;
+  width: max-content;
+}
+
+.featureTrack:hover {
+  animation-play-state: paused;
+}
+
+@keyframes featureScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.featureCard {
+  flex-shrink: 0;
+  background: #fff;
+  border-radius: 12px;
+  padding: 15px;
+  width: 140px;
+  min-height: 130px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.featureCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.featureIcon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.featureIcon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.featureText {
+  font-family: 'Mulish', sans-serif;
+  font-size: 11px;
+  color: #666;
+  text-align: center;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Responsive adjustments */
+@media (min-width: 400px) {
+  .logoCard {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .featureCard {
+    width: 160px;
+    padding: 18px;
+  }
+  
+  .featureText {
+    font-size: 12px;
+  }
+  
+  .sectionTitle {
+    font-size: 32px;
+  }
+}
+
+@media (min-width: 768px) {
+  .carouselContainer {
+    height: 400px;
+  }
+  
+  .carouselTrack {
+    width: 1800px;
+  }
+  
+  .logoCard {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .topCard {
+    offset-path: path("M 1600 250 C 1300 50, 500 50, 200 250");
+  }
+  
+  .bottomCard {
+    offset-path: path("M 1600 380 C 1300 200, 500 200, 200 380");
+  }
+  
+  .illustration {
+    max-width: 280px;
+  }
+  
+  .featureCard {
+    width: 180px;
+    min-height: 150px;
+  }
+  
+  .featureIcon {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .featureText {
+    font-size: 13px;
+  }
+}

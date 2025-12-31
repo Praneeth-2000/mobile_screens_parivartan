@@ -1,0 +1,256 @@
+/* SwipeableLayout - Fixed Header/Footer with Swipeable Middle */
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Inter:wght@400;500;600&family=Mulish:wght@400&display=swap');
+
+/* Full page container */
+.pageContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-image: url('../assets/images/CardBG.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
+}
+
+/* FIXED HEADER */
+.fixedHeader {
+  flex-shrink: 0;
+  padding: 30px 20px 15px;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(247, 253, 250, 0.95) 0%, rgba(247, 253, 250, 0.8) 100%);
+  z-index: 10;
+}
+
+.headingBlock {
+  margin-bottom: 12px;
+}
+
+.heading {
+  font-family: 'Caveat', cursive;
+  font-weight: 500;
+  font-size: 28px;
+  font-style: italic;
+  line-height: 36px;
+  color: #000;
+  text-align: center;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.line1 {
+  display: block;
+}
+
+.line2 {
+  display: block;
+}
+
+.underlineImage {
+  width: 180px;
+  height: auto;
+  margin: -8px 0 -6px -90px;
+  transform: rotate(-2deg);
+}
+
+.description {
+  font-family: 'Mulish', sans-serif;
+  font-size: 14px;
+  color: #333;
+  text-align: center;
+  line-height: 1.5;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+/* SWIPEABLE MIDDLE AREA */
+.swipeArea {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  touch-action: pan-x;
+}
+
+.cardsWrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 15px;
+  box-sizing: border-box;
+}
+
+.card::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
+
+.card {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.active {
+  z-index: 2;
+}
+
+/* Pagination dots */
+.pagination {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 100;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.2);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.dot:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.activeDot {
+  background: #ff6b3d;
+  transform: scale(1.3);
+  box-shadow: 0 2px 6px rgba(255, 107, 61, 0.4);
+}
+
+/* FIXED FOOTER */
+.fixedFooter {
+  flex-shrink: 0;
+  padding: 15px 20px 25px;
+  text-align: center;
+  background: linear-gradient(0deg, rgba(247, 253, 250, 0.95) 0%, rgba(247, 253, 250, 0.8) 100%);
+  z-index: 10;
+}
+
+.footerLine {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.footerLine:last-child {
+  margin-bottom: 0;
+}
+
+.footerText {
+  font-family: 'Caveat', cursive;
+  font-weight: 500;
+  font-size: 22px;
+  color: #1a1a1a;
+  white-space: nowrap;
+}
+
+.footerIcons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.socialIcon,
+.toolIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+
+.socialIcon:hover,
+.toolIcon:hover {
+  transform: scale(1.15);
+}
+
+/* Responsive adjustments */
+@media (min-width: 400px) {
+  .heading {
+    font-size: 32px;
+    line-height: 40px;
+  }
+  
+  .underlineImage {
+    width: 220px;
+    margin: -10px 0 -8px -110px;
+  }
+  
+  .description {
+    font-size: 15px;
+    max-width: 360px;
+  }
+  
+  .footerText {
+    font-size: 24px;
+  }
+}
+
+@media (min-width: 768px) {
+  .fixedHeader {
+    padding: 40px 30px 20px;
+  }
+  
+  .heading {
+    font-size: 42px;
+    line-height: 50px;
+  }
+  
+  .underlineImage {
+    width: 300px;
+    margin: -14px 0 -10px -150px;
+  }
+  
+  .description {
+    font-size: 17px;
+    max-width: 480px;
+  }
+  
+  .footerText {
+    font-size: 28px;
+  }
+  
+  .pagination {
+    right: 20px;
+    gap: 12px;
+  }
+  
+  .dot {
+    width: 12px;
+    height: 12px;
+  }
+}
