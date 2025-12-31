@@ -26,9 +26,9 @@ export const DigitalMarketingCard = () => {
   ];
 
   // Adjust density to be between 1x and 2x to avoid overlap but minimize gap
-  const displayTopLogos = [...topLogos, ...topLogos.slice(0, 3)]; // 5 + 3 = 8 items
-  // Match top carousel density: 8 items for bottom as well (original 3 * 2 + 2 = 8)
-  const displayBottomLogos = [...bottomLogos, ...bottomLogos, ...bottomLogos.slice(0, 2)];
+  // User requested slightly less spacing than 8 items, so increasing to 9 items
+  const displayTopLogos = [...topLogos, ...topLogos.slice(0, 4)]; // 5 + 4 = 9 items
+  const displayBottomLogos = [...bottomLogos, ...bottomLogos, ...bottomLogos]; // 3 + 3 + 3 = 9 items
 
   return (
     <div className={styles.cardContainer}>

@@ -138,13 +138,15 @@
 /* Feature Carousel */
 .featureCarousel {
   width: 100%;
+  max-width: 400px; /* Approx 3 cards + gaps */
+  margin: 0 auto;
   overflow: hidden;
   padding: 10px 0;
 }
 
 .featureTrack {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   animation: featureScroll 18s linear infinite;
   width: max-content;
 }
@@ -220,6 +222,10 @@
   .sectionTitle {
     font-size: 32px;
   }
+
+  .featureCarousel {
+    max-width: 530px; /* 3 * 160px + gaps */
+  }
 }
 
 @media (min-width: 768px) {
@@ -260,5 +266,9 @@
   
   .featureText {
     font-size: 13px;
+  }
+
+  .featureCarousel {
+    max-width: 600px; /* 3 * 180px + gaps */
   }
 }
