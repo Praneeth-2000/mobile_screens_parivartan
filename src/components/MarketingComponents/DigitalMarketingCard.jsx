@@ -1,14 +1,14 @@
 import React from 'react';
 import styles from './MiddleCards.module.css';
-import useCarouselScroll from '../hooks/useCarouselScroll';
+import useCarouselScroll from '../../hooks/useCarouselScroll';
 
 // Import logos
-import client1Logo from '../assets/logos/Client 1.png';
-import client3Logo from '../assets/logos/Client 3.png';
-import client4Logo from '../assets/logos/Client 4.png';
-import client5Logo from '../assets/logos/Client 5.png';
-import client7Logo from '../assets/logos/Client 7.png';
-import client8Logo from '../assets/logos/Client 8.png';
+import client1Logo from '../../assets/logos/Client 1.png';
+import client3Logo from '../../assets/logos/Client 3.png';
+import client4Logo from '../../assets/logos/Client 4.png';
+import client5Logo from '../../assets/logos/Client 5.png';
+import client7Logo from '../../assets/logos/Client 7.png';
+import client8Logo from '../../assets/logos/Client 8.png';
 
 // Card 1: Digital Marketing with Client Carousel
 export const DigitalMarketingCard = () => {

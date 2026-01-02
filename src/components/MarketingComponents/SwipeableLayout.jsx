@@ -1,10 +1,10 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import styles from './SwipeableLayout.module.css';
-import { InstagramIcon, FacebookIcon, GoogleAdsIcon, MetaIcon } from './common/Icons';
+import { InstagramIcon, FacebookIcon, GoogleAdsIcon, MetaIcon } from '../common/Icons';
 
 // Import assets
-import underlineStroke from '../assets/Vector76.svg';
-import emailMarketingLogo from '../assets/logos/Email Marketing.png';
+import underlineStroke from '../../assets/Vector76.svg';
+import emailMarketingLogo from '../../assets/logos/Email Marketing.png';
 
 const SwipeableLayout = ({ children }) => {
   const [currentIndex, setCurrentIndex] = useState(0);

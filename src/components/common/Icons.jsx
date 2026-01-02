@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '../SwipeableLayout.module.css';
+import styles from '../MarketingComponents/SwipeableLayout.module.css';
 
 export const InstagramIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" fill="none" className={styles.footerIconImg}>

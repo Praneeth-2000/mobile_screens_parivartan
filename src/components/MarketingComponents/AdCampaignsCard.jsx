@@ -1,10 +1,10 @@
 import React from 'react';
 import styles from './MiddleCards.module.css';
 import FeatureCardCarousel from './FeatureCardCarousel';
-import adCampaignImg from '../assets/images/Ad campaign.png';
-import groupIcon from '../assets/logos/Group Icon.png';
-import rupeeIcon from '../assets/images/Rupee.png';
-import filterIcon from '../assets/images/Filter.png';
+import adCampaignImg from '../../assets/images/Ad campaign.png';
+import groupIcon from '../../assets/logos/Group Icon.png';
+import rupeeIcon from '../../assets/images/Rupee.png';
+import filterIcon from '../../assets/images/Filter.png';
 
 export const AdCampaignsCard = () => {
   const features = [

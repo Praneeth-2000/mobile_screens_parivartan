@@ -1,10 +1,10 @@
 import React from 'react';
 import styles from './MiddleCards.module.css';
 import FeatureCardCarousel from './FeatureCardCarousel';
-import managementImg from '../assets/images/Management.png';
-import thumbIcon from '../assets/images/Thumb.png';
-import monitorIcon from '../assets/images/Monitor.png';
-import dealIcon from '../assets/images/Deal.png';
+import managementImg from '../../assets/images/Management.png';
+import thumbIcon from '../../assets/images/Thumb.png';
+import monitorIcon from '../../assets/images/Monitor.png';
+import dealIcon from '../../assets/images/Deal.png';
 
 export const ReputationCard = () => {
   const features = [

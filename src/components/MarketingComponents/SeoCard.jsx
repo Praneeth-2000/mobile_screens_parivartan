@@ -1,10 +1,10 @@
 import React from 'react';
 import styles from './MiddleCards.module.css';
 import FeatureCardCarousel from './FeatureCardCarousel';
-import groupIcon from '../assets/logos/Group Icon.png';
-import seoIcon from '../assets/logos/Seo.png';
-import statsIcon from '../assets/logos/Stats Icon.png';
-import seoTitleImage from '../assets/images/seo_title_image.png';
+import groupIcon from '../../assets/logos/Group Icon.png';
+import seoIcon from '../../assets/logos/Seo.png';
+import statsIcon from '../../assets/logos/Stats Icon.png';
+import seoTitleImage from '../../assets/images/seo_title_image.png';
 
 export const SeoCard = () => {
   const features = [
