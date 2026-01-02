@@ -146,22 +146,6 @@ const SwipeableLayout = ({ children }) => {
           })}
         </div>
 
-        <div className={styles.pagination}>
-          {childrenArray.map((_, index) => (
-            <button
-              key={index}
-              className={`${styles.dot} ${index === currentIndex ? styles.activeDot : ''}`}
-              onClick={() => {
-                if (!isTransitioning) {
-                  setIsTransitioning(true);
-                  setCurrentIndex(index);
-                  setTimeout(() => setIsTransitioning(false), 500);
-                }
-              }}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
       </div>
 
       <footer className={styles.fixedFooter}>
