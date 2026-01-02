@@ -142,9 +142,9 @@
   width: 100%;
   max-width: 100%;
   margin: 0 auto;
-  overflow: hidden;
-  padding: 10px 0;
-  height: 35vh; /* Strict budget */
+  overflow: visible; /* Prevent shadow clipping */
+  padding: 30px 0; /* Increased vertical padding for shadow clearance */
+  height: 38vh; /* Slightly increased budget for shadow clearance */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -161,6 +161,7 @@
   gap: 10px;
   animation: featureScroll 18s linear infinite;
   width: max-content;
+  overflow: visible; /* Critical for shadow bleeding */
 }
 
 .featureTrack:hover {

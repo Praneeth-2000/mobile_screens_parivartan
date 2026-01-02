@@ -28,17 +28,6 @@ div[class*="pageContainer"] {
   overflow-x: clip !important;
 }
 
-div[class*="pageContainer"]::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 20vh;
-  background: linear-gradient(to bottom, transparent, #ffffff);
-  pointer-events: none;
-  z-index: 5;
-}
 
 /* Move the "fixed" footer to the bottom of its section */
 header[class*="fixedHeader"],
