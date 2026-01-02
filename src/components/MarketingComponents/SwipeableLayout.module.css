@@ -13,13 +13,13 @@
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
-  overflow: hidden !important;
+  overflow: hidden !important; /* Block all global scrolling */
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 
 .pageContainer::-webkit-scrollbar {
-  display: none;
+  display: none !important;
 }
 
 /* FIXED HEADER */
@@ -81,11 +81,10 @@
 
 .swipeArea {
   flex: 1;
-  min-height: 0; /* Restored for proper flex layout */
+  min-height: 0;
   position: relative;
   overflow: hidden;
-  touch-action: pan-x pan-y; /* Allow bubbling but we still intercept Y with JS */
-  overscroll-behavior: auto;
+  touch-action: none; /* Crucial for custom swipe detection */
   -webkit-user-select: none;
   user-select: none;
 }
@@ -104,27 +103,20 @@
   height: 100%;
   transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
               opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow-y: auto;
-  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  padding: 50px 15px 50px; /* Reduced top from 70px to 50px */
+  justify-content: center; /* Back to center for balanced look */
+  padding: 85px 20px 80px; /* Unified padding for mobile */
   box-sizing: border-box;
-  min-height: 100%;
-  overflow-y: auto;
-  overflow-x: visible; /* Allow jumbo carousel shadows to breathe */
+  overflow-y: auto; /* Internal scroll only if content overflows jumbo cards */
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .card::-webkit-scrollbar {
-  width: 0;
-  background: transparent;
-}
-
-.card {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  display: none !important;
 }
 
 .active {
