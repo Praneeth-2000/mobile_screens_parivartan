@@ -18,9 +18,15 @@ export const useCarouselScroll = (sensitivity = 0.15) => {
   const handleTouchMove = (e) => {
     if (!isDragging.current) return;
     const currentX = e.touches[0].clientX;
-    const delta = currentX - lastTouchX.current;
+    const currentY = e.touches[0].clientY;
+    const deltaX = currentX - lastTouchX.current;
     
-    setScrollProgress((prev) => prev - delta * sensitivity);
+    // If it's clearly a horizontal move, prevent browser from doing other things
+    if (Math.abs(deltaX) > 5) {
+      if (e.cancelable) e.preventDefault();
+    }
+
+    setScrollProgress((prev) => prev - deltaX * sensitivity);
     lastTouchX.current = currentX;
   };
 

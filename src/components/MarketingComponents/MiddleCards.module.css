@@ -43,18 +43,18 @@
 }
 
 .illustration {
-  width: 100%;
-  max-width: 200px;
-  height: auto;
+  width: 180px;
+  height: 150px;
+  object-fit: contain;
 }
 
 /* Client Logo Carousel */
 .carouselContainer {
   width: 100%;
   flex: 1;
-  min-height: 350px;
+  min-height: 500px; /* Increased from 350px for jumbo mobile logos */
   position: relative;
-  overflow-x: hidden; /* Trap the 1200px track */
+  overflow-x: hidden; 
   overflow-y: visible;
   padding: 0 10px;
   mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
@@ -152,13 +152,13 @@
   background: #fff;
   border-radius: 12px;
   padding: 15px;
-  width: 140px;
-  min-height: 130px;
+  width: 180px; /* Restored to perfect size */
+  min-height: 160px; /* Restored to perfect size */
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -198,7 +198,7 @@
   }
   
   .featureCard {
-    width: 160px;
+    width: 200px;
     padding: 18px;
   }
   
@@ -211,7 +211,7 @@
   }
 
   .featureCarousel {
-    max-width: 530px; /* 3 * 160px + gaps */
+    max-width: 650px; 
   }
 }
 
@@ -238,12 +238,14 @@
   }
   
   .illustration {
-    max-width: 280px;
+    width: 240px;
+    height: 180px;
+    object-fit: contain;
   }
   
   .featureCard {
-    width: 180px;
-    min-height: 150px;
+    width: 240px; /* Restored to perfect size */
+    min-height: 180px; /* Restored to perfect size */
   }
   
   .featureIcon {
@@ -256,6 +258,6 @@
   }
 
   .featureCarousel {
-    max-width: 600px; /* 3 * 180px + gaps */
+    max-width: 800px; 
   }
 }

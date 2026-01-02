@@ -11,7 +11,9 @@ const SwipeableLayout = ({ children }) => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const containerRef = useRef(null);
   const touchStartY = useRef(0);
+  const touchStartX = useRef(0);
   const touchEndY = useRef(0);
+  const touchEndX = useRef(0);
   
   const childrenArray = React.Children.toArray(children);
   const totalCards = childrenArray.length;
@@ -35,11 +37,31 @@ const SwipeableLayout = ({ children }) => {
   
   const handleTouchStart = useCallback((e) => {
     touchStartY.current = e.touches[0].clientY;
+    touchStartX.current = e.touches[0].clientX;
+    touchEndY.current = e.touches[0].clientY;
+    touchEndX.current = e.touches[0].clientX;
   }, []);
   
   const handleTouchMove = useCallback((e) => {
-    touchEndY.current = e.touches[0].clientY;
-  }, []);
+    const currentY = e.touches[0].clientY;
+    const currentX = e.touches[0].clientX;
+    const deltaY = touchStartY.current - currentY;
+    const deltaX = touchStartX.current - currentX;
+    
+    // If it's more of a vertical swipe than horizontal
+    if (Math.abs(deltaY) > Math.abs(deltaX)) {
+      // Prevent browser scroll if we can move to a next/prev card
+      if (
+        (deltaY > 10 && currentIndex < totalCards - 1) || // Navigating NEXT
+        (deltaY < -10 && currentIndex > 0) // Navigating PREV
+      ) {
+        if (e.cancelable) e.preventDefault();
+      }
+    }
+    
+    touchEndY.current = currentY;
+    touchEndX.current = currentX;
+  }, [currentIndex, totalCards]);
   
   const handleTouchEnd = useCallback(() => {
     const swipeDistance = touchStartY.current - touchEndY.current;
