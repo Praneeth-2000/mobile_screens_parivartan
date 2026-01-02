@@ -13,9 +13,13 @@
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
-  overflow: hidden;
-  overscroll-behavior: none; /* Prevent pull-to-refresh */
-  -webkit-overflow-scrolling: auto;
+  overflow: hidden !important;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.pageContainer::-webkit-scrollbar {
+  display: none;
 }
 
 /* FIXED HEADER */
@@ -105,12 +109,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start; /* Switch to start for better small screen flow */
-  padding: 85px 20px 60px; /* Reduced for mobile */
+  justify-content: flex-start;
+  padding: 50px 15px 50px; /* Reduced top from 70px to 50px */
   box-sizing: border-box;
   min-height: 100%;
-  overflow-y: auto; /* Allow internal scroll if needed */
-  overflow-x: hidden;
+  overflow-y: auto;
+  overflow-x: visible; /* Allow jumbo carousel shadows to breathe */
 }
 
 .card::-webkit-scrollbar {
@@ -224,7 +228,7 @@
 
 @media (min-width: 768px) {
   .fixedHeader {
-    padding: 40px 30px 20px;
+    padding: 20px 30px 10px; /* Reduced from 40px/20px */
   }
   
   .description {
@@ -242,8 +246,8 @@
   }
   
   .card {
-    justify-content: center; /* Back to centered for desktop */
-    padding: 120px 20px 100px;
+    justify-content: center;
+    padding: 30px 15px 30px; /* Minimal padding to prevent clipping */
   }
 }
 

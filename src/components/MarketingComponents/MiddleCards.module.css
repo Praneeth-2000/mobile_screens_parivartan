@@ -8,9 +8,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start; /* Unified start position for titles */
   gap: 12px;
-  padding: 10px 0; 
+  padding: 10px 0 20px; /* Smaller top padding */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.cardContainer::-webkit-scrollbar {
+  display: none;
 }
 
 /* Accent text (digital marketing) */
@@ -125,10 +131,14 @@
 /* Feature Carousel */
 .featureCarousel {
   width: 100%;
-  max-width: 400px; /* Approx 3 cards + gaps */
+  max-width: 100%; /* More responsive on mobile */
   margin: 0 auto;
-  overflow: hidden;
-  padding: 10px 0;
+  overflow: visible; /* Allow shadows to bleed */
+  padding: 30px 0; /* Increased for jumbo shadows */
+  display: flex;
+  justify-content: center;
+  mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
 }
 
 .featureTrack {
@@ -211,13 +221,14 @@
   }
 
   .featureCarousel {
-    max-width: 650px; 
+    max-width: 100%; 
+    padding: 35px 0;
   }
 }
 
 @media (min-width: 768px) {
   .carouselContainer {
-    height: 650px; /* Increased from 600px for larger cards */
+    height: 450px; /* Aggressively reduced from 550px for tablet visibility */
   }
   
   .carouselTrack {
@@ -238,8 +249,8 @@
   }
   
   .illustration {
-    width: 240px;
-    height: 180px;
+    width: 160px; /* Further reduced from 200px */
+    height: 120px;
     object-fit: contain;
   }
   
@@ -258,6 +269,7 @@
   }
 
   .featureCarousel {
-    max-width: 800px; 
+    max-width: 1200px; /* Allow more visible cards on desktop */
+    padding: 40px 0;
   }
 }
