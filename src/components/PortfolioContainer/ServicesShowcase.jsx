@@ -151,7 +151,6 @@ const ServicesShowcase = () => {
             className="services-showcase"
             onWheel={handleWheel}
             onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
         >
             <div className="services-header-fixed">

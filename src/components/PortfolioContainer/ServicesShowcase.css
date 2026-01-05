@@ -9,7 +9,7 @@
     overflow: hidden;
     min-height: auto;
     background: #fff;
-    touch-action: none;
+    touch-action: pan-y;
 }
 
 .services-header-fixed {
