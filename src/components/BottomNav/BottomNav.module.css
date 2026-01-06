@@ -1,12 +1,19 @@
 .bottomNavContainer {
     position: fixed;
-    bottom: calc(5vh + env(safe-area-inset-bottom));
+    /* Move bottom up explicitly to avoid any zero-edge ambiguity */
+    bottom: 35px; 
     left: 0;
     right: 0;
+    width: 100%;
+    z-index: 99999;
+    pointer-events: none;
     display: flex;
     justify-content: center;
-    z-index: 100;
-    pointer-events: none;
+    align-items: flex-end;
+    
+    /* Just use safe area for padding, since base lift is handled by 'bottom' */
+    padding-bottom: 0px; 
+    padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .bottomNav {
@@ -43,6 +50,7 @@
     min-width: 60px;
     height: 48px;
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .navIcon {
@@ -64,6 +72,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .whatsappCircle {
@@ -82,18 +91,24 @@
     transform: scale(1.05);
 }
 
-/* Responsive adjustments for smaller screens */
+/* Phones (small) - Overrides */
 @media (max-width: 380px) {
+    .bottomNavContainer {
+        bottom: 20px; /* Explicit request */
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
     .bottomNav {
         height: 60px;
         padding: 0 15px;
         gap: 5px;
         border-radius: 30px;
+        width: calc(100% - 20px);
     }
 
     .navItem {
-        min-width: 50px;
-        padding: 4px 8px;
+        min-width: 45px;
+        padding: 4px 6px;
         height: 44px;
     }
 
@@ -109,5 +124,12 @@
     .whatsappCircle {
         width: 42px;
         height: 42px;
+    }
+}
+
+/* Desktop/Tablet - slightly looser */
+@media (min-width: 768px) {
+    .bottomNavContainer {
+        bottom: 40px; 
     }
 }

@@ -41,8 +41,10 @@
   align-items: center;
 }
 
+/* .digitalMarketingTitle removed or reset to avoid pulling content up */
 .digitalMarketingTitle {
-  margin-top: -30px;
+  margin-top: 0;
+  margin-bottom: 10px;
 }
 
 /* Illustration wrapper */
@@ -66,8 +68,8 @@
 /* Client Logo Carousel */
 .carouselContainer {
   width: 100%;
-  flex: 1;
-  max-height: 58vh; /* Maximum vertical budget */
+  height: 55vh; /* Fixed height to allow justify-content: space-between to work */
+  max-height: 58vh;
   position: relative;
   overflow: visible; 
   padding: 40px 10px 20px; /* Massive top padding for curve clearance */
@@ -301,5 +303,21 @@
   .featureCarousel {
     max-width: 1200px; /* Allow more visible cards on desktop */
     padding: 40px 0;
+  }
+}
+@media (max-width: 380px) {
+  .featureCard {
+    margin-right: 8px; /* Reduced gap for small screens */
+    width: clamp(130px, 40vw, 160px);
+    padding: 12px;
+  }
+
+  .cardContainer {
+    gap: 5px; /* Ensure vertical gap is minimal */
+  }
+
+  .logoCard {
+    /* Minimal adjustment if needed, but primarily featureCard affects "gap" perception */
+    margin: 0; 
   }
 }

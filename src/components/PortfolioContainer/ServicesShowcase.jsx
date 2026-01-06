@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import './ServicesShowcase.css';
+import ExplorePopup from './ExplorePopup';
 import andhraLogo from '../../assets/images/andhra-canteen-logo.png';
 import sudhaLogo from '../../assets/images/sudha-logo.png';
 import brochureImg from '../../assets/images/service-sudha-brochure-new.png';
@@ -57,6 +58,7 @@ const ServicesShowcase = () => {
     const [prevIndex, setPrevIndex] = useState(null);
     const [direction, setDirection] = useState(null);
     const [isAnimating, setIsAnimating] = useState(false);
+    const [showPopup, setShowPopup] = useState(false);
     
     // Refs for state access inside event listeners
     const activeIndexRef = useRef(0);
@@ -312,11 +314,12 @@ const ServicesShowcase = () => {
                         <div className="services-pill-bar">
                             <p className="pill-content">{currentService.pill}</p>
                         </div>
-                        <button className="explore-button">explore</button>
+                        <button className="explore-button" onClick={() => setShowPopup(true)}>explore</button>
                     </div>
                 </div>
             </div>
 
+            {showPopup && <ExplorePopup onClose={() => setShowPopup(false)} />}
         </section>
     );
 };

@@ -163,3 +163,40 @@
     right: -50px;
     transform: rotate(-5deg);
 }
+/* Responsive Scaling for Mobile Devices */
+@media (max-width: 600px) {
+    .testimonial-popup-content {
+        padding: 20px 10px; /* Reduce padding */
+        width: 100vw;
+        max-width: 100vw;
+        overflow-x: hidden;
+    }
+
+    .chat-bubble-container {
+        /* Scale down to fit 450px + overhangs into ~360-400px space */
+        transform: scale(0.85); 
+        transform-origin: center center;
+        margin-top: -20px; /* Pull up slightly if needed */
+    }
+}
+
+@media (max-width: 450px) {
+    .chat-bubble-container {
+        /* Aggressive scaling for small phones to clear swirls (Total visually ~525px -> ~350px needed) */
+        transform: scale(0.65); 
+    }
+    
+    .testimonial-author {
+        font-size: 1.6rem; /* Slightly adjust text readability if scale shrinks it too much visually */
+    }
+
+    .testimonial-text {
+        font-size: 0.9rem; /* Bump base font slightly so it's readable after scale down */
+    }
+    
+    .close-button {
+        top: 0px; 
+        right: 15px;
+        transform: scale(0.9);
+    }
+}

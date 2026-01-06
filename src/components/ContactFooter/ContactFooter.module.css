@@ -14,6 +14,7 @@
   flex-direction: column;
   align-items: center;
   gap: 30px;
+
 }
 
 .headingBlock {
@@ -174,9 +175,8 @@
 
 .footer {
   background-color: #f9f9f9;
-  padding: 40px 20px 60px;
-  padding-bottom: max(20px, env(safe-area-inset-bottom));
-  margin-bottom: 100px;
+  padding: 40px 20px 200px; /* Massive padding to clear fixed navbar */
+  margin-bottom: 0; /* Remove margin bottom as padding handles space */
   text-align: center;
   display: flex;
   flex-direction: column;

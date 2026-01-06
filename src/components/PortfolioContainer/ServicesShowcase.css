@@ -59,7 +59,7 @@
 .showcase-content-fixed {
     position: relative;
     width: 100%;
-    min-height: 500px; /* Further reduced from 540px */
+    min-height: 550px; /* Increased to 550px to prevent button cutoff */
     margin-top: 5px;
     overflow: visible;
 }
@@ -251,11 +251,11 @@
 }
 
 .explore-button {
-    background: #000;
+    background: linear-gradient(180deg, #73BF44 0%, #388807 100%);
     color: #fff;
     border: none;
-    padding: 8px 24px;
-    border-radius: 20px;
+    padding: 8px 30px;
+    border-radius: 17.5px;
     font-family: 'Inter', sans-serif;
     font-size: 14px;
     font-weight: 500;
