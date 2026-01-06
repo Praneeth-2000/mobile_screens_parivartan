@@ -16,7 +16,7 @@
     top: 0;
     right: 0;
     /* Anchor image to right */
-    width: 80px;
+    width: clamp(35px, 9vw, 65px); /* Further reduced scaling for medium screens */
     height: auto;
     z-index: -1;
     opacity: 1;
@@ -32,13 +32,13 @@
 }
 
 .rating-content span {
-    font-family: 'Caveat', cursive; /* Replaced var(--font-hand) since it might not be defined */
-    font-size: 1.2rem;
+    font-family: 'Caveat', cursive;
+    font-size: clamp(0.9rem, 4vw, 1.4rem); /* Responsive font size */
     font-weight: 600;
-    color: #1a1a1a;  /* Replaced var(--text-dark) */
+    color: #1a1a1a;
 }
 
 .google-logo {
-    height: 20px;
+    height: clamp(16px, 5vw, 24px); /* Responsive height */
     width: auto;
 }

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import './ServicesShowcase.css';
 import andhraLogo from '../../assets/images/andhra-canteen-logo.png';
 import sudhaLogo from '../../assets/images/sudha-logo.png';
@@ -55,103 +55,175 @@ const servicesData = [
 const ServicesShowcase = () => {
     const [activeIndex, setActiveIndex] = useState(0);
     const [prevIndex, setPrevIndex] = useState(null);
-    const [direction, setDirection] = useState(null); // 'up' (next) or 'down' (prev)
+    const [direction, setDirection] = useState(null);
     const [isAnimating, setIsAnimating] = useState(false);
+    
+    // Refs for state access inside event listeners
+    const activeIndexRef = useRef(0);
+    const isAnimatingRef = useRef(false);
+    const sectionRef = useRef(null);
+    
+    // Touch tracking
     const touchStartY = useRef(0);
+    const touchStartX = useRef(0);
 
-    const handleNext = () => {
-        if (isAnimating) return;
+    // Sync refs with state
+    useEffect(() => {
+        activeIndexRef.current = activeIndex;
+    }, [activeIndex]);
 
-        // If at the last service, attempt to scroll to next section or stop
-        if (activeIndex === servicesData.length - 1) {
-            const nextSection = document.getElementById('dummy-section-container'); // Or whatever the next section ID is
-            if (nextSection) {
-                nextSection.scrollIntoView({ behavior: 'smooth' });
-            }
-            return; // STOP here regardless of whether nextSection exists
-        }
+    useEffect(() => {
+        isAnimatingRef.current = isAnimating;
+    }, [isAnimating]);
 
-        setDirection('up'); // Content moving up (entering from bottom)
-        setPrevIndex(activeIndex);
+    const handleNext = useCallback(() => {
+        if (isAnimatingRef.current) return;
+        if (activeIndexRef.current >= servicesData.length - 1) return;
+
+        setDirection('up');
+        setPrevIndex(activeIndexRef.current);
         setIsAnimating(true);
         setActiveIndex((prev) => prev + 1);
-    };
+    }, []);
 
-    const handlePrev = () => {
-        if (isAnimating) return;
+    const handlePrev = useCallback(() => {
+        if (isAnimatingRef.current) return;
+        if (activeIndexRef.current <= 0) return;
 
-        // If at the first service, scroll up to the previous section
-        if (activeIndex === 0) {
-            const prevSection = document.getElementById('portfolio-section-container');
-            if (prevSection) {
-                prevSection.scrollIntoView({ behavior: 'smooth' });
-                return;
-            }
-        }
-
-        setDirection('down'); // Content moving down (entering from top)
-        setPrevIndex(activeIndex);
+        setDirection('down');
+        setPrevIndex(activeIndexRef.current);
         setIsAnimating(true);
         setActiveIndex((prev) => prev - 1);
-    };
+    }, []);
 
+    // Animation reset timer
     useEffect(() => {
         if (isAnimating) {
             const timer = setTimeout(() => {
                 setIsAnimating(false);
                 setDirection(null);
-            }, 600); // Match CSS transition duration
+            }, 600);
             return () => clearTimeout(timer);
         }
     }, [isAnimating]);
 
+    // Touch Start Handler (passive is fine here, we just need start coords)
     const handleTouchStart = (e) => {
         touchStartY.current = e.touches[0].clientY;
+        touchStartX.current = e.touches[0].clientX;
     };
 
-    const handleWheel = (e) => {
-        if (isAnimating) return;
+    // The core logic for scroll locking and interaction
+    useEffect(() => {
+        const element = sectionRef.current;
+        if (!element) return;
 
-        // e.deltaY > 0 is scroll DOWN -> want NEXT
-        // e.deltaY < 0 is scroll UP -> want PREV
-        if (Math.abs(e.deltaY) > 10) {
-            if (e.deltaY > 0) {
-                handleNext();
-            } else {
-                handlePrev();
+        // Helper to check if component is centered in viewport
+        const isCenteredInViewport = () => {
+            const rect = element.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            const elementCenter = rect.top + rect.height / 2;
+            const viewportCenter = viewportHeight / 2;
+            
+            // Relaxed threshold: 30% of viewport height (easier to catch)
+            const threshold = viewportHeight * 0.3; 
+            
+            // Also check if element effectively covers the main interaction area
+            // (Top is near or above top edge, Bottom is near or below bottom edge)
+            const coversScreen = rect.top <= viewportHeight * 0.2 && rect.bottom >= viewportHeight * 0.8;
+
+            return Math.abs(elementCenter - viewportCenter) < threshold || coversScreen;
+        };
+
+        const handleWheelNonPassive = (e) => {
+            if (!isCenteredInViewport()) return;
+
+            const isVerticalScroll = Math.abs(e.deltaY) > Math.abs(e.deltaX);
+            if (!isVerticalScroll) return;
+
+            const currentIndex = activeIndexRef.current;
+            const isScrollingDown = e.deltaY > 0;
+            const isScrollingUp = e.deltaY < 0;
+
+            // Boundary checks
+            if (isScrollingDown && currentIndex >= servicesData.length - 1) return; // Release to page scroll
+            if (isScrollingUp && currentIndex <= 0) return; // Release to page scroll
+
+            // If we are here, we are interacting with the carousel
+            // Prevent default page scroll
+            if (e.cancelable) e.preventDefault();
+
+            // Trigger navigation (debounce could be added if needed, but simple check works)
+            if (Math.abs(e.deltaY) > 10) {
+                 if (isScrollingDown) handleNext();
+                 else handlePrev();
             }
-        }
-    };
+        };
 
-    const handleTouchMove = (e) => {
-        // Prevent default browser scrolling when swiping inside this component
-        if (e.cancelable) e.preventDefault();
-    };
+        const handleTouchMoveNonPassive = (e) => {
+            const touchY = e.touches[0].clientY;
+            const touchX = e.touches[0].clientX;
+            const deltaY = touchStartY.current - touchY; // Positive = swipe up (scroll down)
+            const deltaX = touchStartX.current - touchX;
 
-    const handleTouchEnd = (e) => {
-        const touchEndY = e.changedTouches[0].clientY;
-        const deltaY = touchStartY.current - touchEndY;
+            // Directional Locking: Only care if mostly vertical swipe
+            if (Math.abs(deltaY) < Math.abs(deltaX) || Math.abs(deltaY) < 5) return;
 
-        // deltaY > 0 is Swipe UP -> want NEXT section/item
-        // deltaY < 0 is Swipe DOWN -> want PREV section/item
-        if (Math.abs(deltaY) > 30) {
-            if (deltaY > 0) {
-                handleNext();
-            } else {
-                handlePrev();
-            }
-        }
-    };
+            if (!isCenteredInViewport()) return;
+
+            const currentIndex = activeIndexRef.current;
+            const isSwipingUp = deltaY > 0; // Finger moves up, content moves up (Next)
+            const isSwipingDown = deltaY < 0; // Finger moves down, content moves down (Prev)
+
+            // Boundary Checks
+            if (isSwipingUp && currentIndex >= servicesData.length - 1) return; // Release
+            if (isSwipingDown && currentIndex <= 0) return; // Release
+
+            // Lock scroll
+            if (e.cancelable) e.preventDefault();
+        };
+
+        const handleTouchEndNonPassive = (e) => {
+            if (!isCenteredInViewport()) return;
+            
+            const touchEndY = e.changedTouches[0].clientY;
+            const deltaY = touchStartY.current - touchEndY;
+            
+            // Only trigger if we prevented default (meaning we locked it), or just purely based on logic
+            // To be safe, re-check boundaries and magnitude
+             const currentIndex = activeIndexRef.current;
+             const isSwipingUp = deltaY > 0;
+             const isSwipingDown = deltaY < 0;
+
+             if (Math.abs(deltaY) > 40) { // Minimum swipe distance
+                 if (isSwipingUp && currentIndex < servicesData.length - 1) {
+                     handleNext();
+                 } else if (isSwipingDown && currentIndex > 0) {
+                     handlePrev();
+                 }
+             }
+        };
+
+        element.addEventListener('wheel', handleWheelNonPassive, { passive: false });
+        element.addEventListener('touchmove', handleTouchMoveNonPassive, { passive: false });
+        // We use touchend to actually trigger the state change for swipes to feel natural
+        element.addEventListener('touchend', handleTouchEndNonPassive, { passive: false });
+
+        return () => {
+            element.removeEventListener('wheel', handleWheelNonPassive);
+            element.removeEventListener('touchmove', handleTouchMoveNonPassive);
+            element.removeEventListener('touchend', handleTouchEndNonPassive);
+        };
+    }, [handleNext, handlePrev]); 
 
     const currentService = servicesData[activeIndex];
     const previousService = prevIndex !== null ? servicesData[prevIndex] : null;
 
     return (
         <section
+            ref={sectionRef}
             className="services-showcase"
-            onWheel={handleWheel}
             onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
         >
             <div className="services-header-fixed">
                 <h2 className="services-title">
@@ -219,7 +291,7 @@ const ServicesShowcase = () => {
                                 </div>
                             )}
                             <div className="logo-carousel-static">
-                                <button className="nav-arrow left" aria-label="Previous image">
+                                <button className="nav-arrow left" aria-label="Previous image" onClick={handlePrev}>
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
                                 </button>
                                 <div className={`logo-display-static ${currentService.id}-logo`}>
@@ -232,7 +304,7 @@ const ServicesShowcase = () => {
                                     )}
                                 </div>
 
-                                <button className="nav-arrow right" aria-label="Next image">
+                                <button className="nav-arrow right" aria-label="Next image" onClick={handleNext}>
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
                                 </button>
                             </div>
@@ -240,6 +312,7 @@ const ServicesShowcase = () => {
                         <div className="services-pill-bar">
                             <p className="pill-content">{currentService.pill}</p>
                         </div>
+                        <button className="explore-button">explore</button>
                     </div>
                 </div>
             </div>

@@ -73,6 +73,7 @@
   padding: 40px 10px 20px; /* Massive top padding for curve clearance */
   scrollbar-width: none;
   -ms-overflow-style: none;
+  touch-action: pan-y;
 }
 
 .carouselContainer::-webkit-scrollbar {

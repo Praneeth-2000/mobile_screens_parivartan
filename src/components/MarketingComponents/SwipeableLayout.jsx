@@ -47,6 +47,16 @@ const SwipeableLayout = ({ children }) => {
     const currentX = e.touches[0].clientX;
     const deltaY = touchStartY.current - currentY;
     const deltaX = touchStartX.current - currentX;
+
+    // Check visibility similar to ServicesShowcase
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      
+      // Allow scroll if component is not mostly visible
+      const isMostlyVisible = rect.top >= 0 && rect.bottom <= viewportHeight;
+      if (!isMostlyVisible) return;
+    }
     
     // If it's more of a vertical swipe than horizontal
     if (Math.abs(deltaY) > Math.abs(deltaX)) {
@@ -79,6 +89,14 @@ const SwipeableLayout = ({ children }) => {
   const handleWheel = useCallback((e) => {
     if (isTransitioning) return;
     
+    // Check visibility
+    if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const isMostlyVisible = rect.top >= 0 && rect.bottom <= viewportHeight;
+        if (!isMostlyVisible) return;
+    }
+
     // Check if we are at horizontal/vertical boundary
     if (e.deltaY > 0 && currentIndex < totalCards - 1) {
       e.preventDefault();

@@ -9,10 +9,12 @@ export const useCarouselScroll = (sensitivity = 0.15) => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const isDragging = useRef(false);
   const lastTouchX = useRef(0);
+  const lastTouchY = useRef(0);
 
   const handleTouchStart = (e) => {
     isDragging.current = true;
     lastTouchX.current = e.touches[0].clientX;
+    lastTouchY.current = e.touches[0].clientY;
   };
 
   const handleTouchMove = (e) => {
@@ -20,14 +22,15 @@ export const useCarouselScroll = (sensitivity = 0.15) => {
     const currentX = e.touches[0].clientX;
     const currentY = e.touches[0].clientY;
     const deltaX = currentX - lastTouchX.current;
+    const deltaY = currentY - lastTouchY.current;
     
-    // If it's clearly a horizontal move, prevent browser from doing other things
-    if (Math.abs(deltaX) > 5) {
+    // Determine if the gesture is horizontal
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 2) {
       if (e.cancelable) e.preventDefault();
+      setScrollProgress((prev) => prev - deltaX * sensitivity);
+      lastTouchX.current = currentX;
+      lastTouchY.current = currentY;
     }
-
-    setScrollProgress((prev) => prev - deltaX * sensitivity);
-    lastTouchX.current = currentX;
   };
 
   const handleTouchEnd = () => {
