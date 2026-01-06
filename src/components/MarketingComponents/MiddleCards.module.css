@@ -41,6 +41,10 @@
   align-items: center;
 }
 
+.digitalMarketingTitle {
+  margin-top: -30px;
+}
+
 /* Illustration wrapper */
 .illustrationWrapper {
   display: flex;
@@ -80,7 +84,7 @@
   width: 1200px;
   height: 100%;
   left: 50%;
-  top: 0; /* Reduced from 20px */
+  top: 30px;
   transform: translateX(-50%);
   perspective: 1000px;
   overflow: visible;
@@ -88,7 +92,7 @@
 
 .logoCard {
   background: #fff;
-  border-radius: 20px;
+  border-radius: 7px;
   padding: 10px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12); /* More prominent shadow */
   display: flex;

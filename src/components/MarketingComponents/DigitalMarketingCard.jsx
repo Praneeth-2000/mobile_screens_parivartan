@@ -33,7 +33,7 @@ export const DigitalMarketingCard = () => {
 
   return (
     <div className={styles.cardContainer}>
-      <h2 className={styles.sectionTitle}>digital marketing</h2>
+      <h2 className={`${styles.sectionTitle} ${styles.digitalMarketingTitle}`}>digital marketing</h2>
       
       <div 
         className={styles.carouselContainer}
