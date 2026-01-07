@@ -172,11 +172,10 @@ const ServicesShowcase = () => {
             const elementCenter = rect.top + rect.height / 2;
             const viewportCenter = viewportHeight / 2;
 
-            // Relaxed threshold: 30% of viewport height (easier to catch)
-            const threshold = viewportHeight * 0.3;
+            // "Magnetic" threshold: 40% of viewport height
+            const threshold = viewportHeight * 0.4;
 
             // Also check if element effectively covers the main interaction area
-            // (Top is near or above top edge, Bottom is near or below bottom edge)
             const coversScreen = rect.top <= viewportHeight * 0.2 && rect.bottom >= viewportHeight * 0.8;
 
             return Math.abs(elementCenter - viewportCenter) < threshold || coversScreen;
@@ -192,42 +191,44 @@ const ServicesShowcase = () => {
             const isScrollingDown = e.deltaY > 0;
             const isScrollingUp = e.deltaY < 0;
 
-            // Boundary checks
-            if (isScrollingDown && currentIndex >= servicesData.length - 1) return; // Release to page scroll
-            if (isScrollingUp && currentIndex <= 0) return; // Release to page scroll
+            // Boundary checks for locking
+            const canGoNext = isScrollingDown && currentIndex < servicesData.length - 1;
+            const canGoPrev = isScrollingUp && currentIndex > 0;
 
-            // If we are here, we are interacting with the carousel
-            // Prevent default page scroll
-            if (e.cancelable) e.preventDefault();
+            if (canGoNext || canGoPrev) {
+                // Firmly lock scroll within the section
+                if (e.cancelable) e.preventDefault();
 
-            // Trigger service navigation for scroll/swipe (not image cycling)
-            if (Math.abs(e.deltaY) > 10) {
-                if (isScrollingDown) handleNextService();
-                else handlePrevService();
+                // Trigger navigation if past small threshold and not already animating
+                if (!isAnimatingRef.current && Math.abs(e.deltaY) > 5) {
+                    if (isScrollingDown) handleNextService();
+                    else handlePrevService();
+                }
             }
+            // Release to page scroll at boundaries
         };
 
         const handleTouchMoveNonPassive = (e) => {
-            const touchY = e.touches[0].clientY;
-            const touchX = e.touches[0].clientX;
-            const deltaY = touchStartY.current - touchY; // Positive = swipe up (scroll down)
-            const deltaX = touchStartX.current - touchX;
-
-            // Directional Locking: Only care if mostly vertical swipe
-            if (Math.abs(deltaY) < Math.abs(deltaX) || Math.abs(deltaY) < 5) return;
-
             if (!isCenteredInViewport()) return;
 
-            const currentIndex = activeIndexRef.current;
-            const isSwipingUp = deltaY > 0; // Finger moves up, content moves up (Next)
-            const isSwipingDown = deltaY < 0; // Finger moves down, content moves down (Prev)
+            const touchY = e.touches[0].clientY;
+            const touchX = e.touches[0].clientX;
+            const deltaY = touchStartY.current - touchY;
+            const deltaX = touchStartX.current - touchX;
 
-            // Boundary Checks
-            if (isSwipingUp && currentIndex >= servicesData.length - 1) return; // Release
-            if (isSwipingDown && currentIndex <= 0) return; // Release
+            // Strictly vertical check
+            if (Math.abs(deltaY) > Math.abs(deltaX)) {
+                const isSwipingUp = deltaY > 0; // Swipe UP = Next
+                const isSwipingDown = deltaY < 0; // Swipe DOWN = Prev
+                const currentIndex = activeIndexRef.current;
 
-            // Lock scroll
-            if (e.cancelable) e.preventDefault();
+                const canGoNext = isSwipingUp && currentIndex < servicesData.length - 1;
+                const canGoPrev = isSwipingDown && currentIndex > 0;
+
+                if (canGoNext || canGoPrev) {
+                    if (e.cancelable) e.preventDefault();
+                }
+            }
         };
 
         const handleTouchEndNonPassive = (e) => {

@@ -19,22 +19,51 @@ const SwipeableLayout = ({ children }) => {
   const totalCards = childrenArray.length;
   const minSwipeDistance = 50;
   
+  const currentIndexRef = useRef(0);
+  const isTransitioningRef = useRef(false);
+
+  // Sync refs with state for use in event listeners
+  useEffect(() => {
+    currentIndexRef.current = currentIndex;
+  }, [currentIndex]);
+
+  useEffect(() => {
+    isTransitioningRef.current = isTransitioning;
+  }, [isTransitioning]);
+  
   const goToNext = useCallback(() => {
-    if (currentIndex < totalCards - 1 && !isTransitioning) {
+    if (currentIndexRef.current < totalCards - 1 && !isTransitioningRef.current) {
       setIsTransitioning(true);
       setCurrentIndex(prev => prev + 1);
       setTimeout(() => setIsTransitioning(false), 500);
     }
-  }, [currentIndex, totalCards, isTransitioning]);
+  }, [totalCards]);
   
   const goToPrev = useCallback(() => {
-    if (currentIndex > 0 && !isTransitioning) {
+    if (currentIndexRef.current > 0 && !isTransitioningRef.current) {
       setIsTransitioning(true);
       setCurrentIndex(prev => prev - 1);
       setTimeout(() => setIsTransitioning(false), 500);
     }
-  }, [currentIndex, isTransitioning]);
+  }, []);
   
+  // Helper to check if component is centered in viewport
+  const isCenteredInViewport = () => {
+    if (!containerRef.current) return false;
+    const rect = containerRef.current.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const elementCenter = rect.top + rect.height / 2;
+    const viewportCenter = viewportHeight / 2;
+
+    // "Magnetic" threshold: 40% of viewport height
+    const threshold = viewportHeight * 0.4;
+
+    // Check if element is centered OR if it covers the main interaction area
+    const coversScreen = rect.top <= viewportHeight * 0.2 && rect.bottom >= viewportHeight * 0.8;
+
+    return Math.abs(elementCenter - viewportCenter) < threshold || coversScreen;
+  };
+
   const handleTouchStart = useCallback((e) => {
     touchStartY.current = e.touches[0].clientY;
     touchStartX.current = e.touches[0].clientX;
@@ -43,35 +72,30 @@ const SwipeableLayout = ({ children }) => {
   }, []);
   
   const handleTouchMove = useCallback((e) => {
+    if (!isCenteredInViewport()) return;
+
     const currentY = e.touches[0].clientY;
     const currentX = e.touches[0].clientX;
     const deltaY = touchStartY.current - currentY;
     const deltaX = touchStartX.current - currentX;
 
-    // Check visibility similar to ServicesShowcase
-    if (containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
-      
-      // Allow scroll if component is not mostly visible
-      const isMostlyVisible = rect.top >= 0 && rect.bottom <= viewportHeight;
-      if (!isMostlyVisible) return;
-    }
-    
-    // If it's more of a vertical swipe than horizontal
+    // Strict vertical swipe check
     if (Math.abs(deltaY) > Math.abs(deltaX)) {
-      // Prevent browser scroll if we can move to a next/prev card
-      if (
-        (deltaY > 10 && currentIndex < totalCards - 1) || // Navigating NEXT
-        (deltaY < -10 && currentIndex > 0) // Navigating PREV
-      ) {
+      const isSwipingUp = deltaY > 0; // Swipe finger UP = navigate forward
+      const isSwipingDown = deltaY < 0; // Swipe finger DOWN = navigate backward
+
+      // LOCK scroll if we have cards anyway or if we are firmly in the zone
+      const canGoNext = isSwipingUp && currentIndexRef.current < totalCards - 1;
+      const canGoPrev = isSwipingDown && currentIndexRef.current > 0;
+
+      if (canGoNext || canGoPrev) {
         if (e.cancelable) e.preventDefault();
       }
     }
     
     touchEndY.current = currentY;
     touchEndX.current = currentX;
-  }, [currentIndex, totalCards]);
+  }, [totalCards]);
   
   const handleTouchEnd = useCallback(() => {
     const swipeDistance = touchStartY.current - touchEndY.current;
@@ -87,26 +111,27 @@ const SwipeableLayout = ({ children }) => {
   }, [goToNext, goToPrev]);
   
   const handleWheel = useCallback((e) => {
-    if (isTransitioning) return;
+    if (!isCenteredInViewport()) return;
     
-    // Check visibility
-    if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        const isMostlyVisible = rect.top >= 0 && rect.bottom <= viewportHeight;
-        if (!isMostlyVisible) return;
-    }
+    const isScrollingDown = e.deltaY > 0;
+    const isScrollingUp = e.deltaY < 0;
 
-    // Check if we are at horizontal/vertical boundary
-    if (e.deltaY > 0 && currentIndex < totalCards - 1) {
-      e.preventDefault();
-      goToNext();
-    } else if (e.deltaY < 0 && currentIndex > 0) {
-      e.preventDefault();
-      goToPrev();
+    // Check boundaries for strict locking interaction
+    const canGoNext = isScrollingDown && currentIndexRef.current < totalCards - 1;
+    const canGoPrev = isScrollingUp && currentIndexRef.current > 0;
+
+    if (canGoNext || canGoPrev) {
+      // Intercept and prevent page scroll
+      if (e.cancelable) e.preventDefault();
+      
+      // Navigate if not already transitioning and past sensitivity threshold
+      if (!isTransitioningRef.current && Math.abs(e.deltaY) > 5) {
+        if (isScrollingDown) goToNext();
+        else goToPrev();
+      }
     }
-    // If at last card and scrolling down, or first and scrolling up, let it bubble to page scroll
-  }, [goToNext, goToPrev, isTransitioning, currentIndex, totalCards]);
+    // If at boundaries, do not prevent default, allowing page scroll exit
+  }, [goToNext, goToPrev, totalCards]);
   
   useEffect(() => {
     const container = containerRef.current;

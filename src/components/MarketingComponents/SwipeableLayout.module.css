@@ -114,7 +114,7 @@
   min-height: 0;
   position: relative;
   overflow: visible; /* Prevent any clipping of shadows or curves */
-  touch-action: none; /* Crucial for custom swipe detection */
+  touch-action: pan-x; /* Let vertical page scroll through when JS doesn't block it */
   -webkit-user-select: none;
   user-select: none;
 }
