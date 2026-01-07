@@ -18,20 +18,28 @@ const servicesData = [
     {
         id: 'branding',
         subtitle: 'corporate branding',
-        image: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=1000',
+        images: [
+            'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=1000',
+            'https://images.unsplash.com/photo-1556761175-b413da4baf72?q=80&w=1000',
+            'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1000'
+        ],
         logo: andhraLogoV2,
         logoAlt: 'Andhra Canteen Logo',
         pill: 'in-store branding  •  print collateral  •  menu designs  •  website',
-        type: 'single'
+        type: 'gallery'
     },
     {
         id: 'sudha',
         subtitle: 'print, media, design',
-        image: sudhaBrochureV2,
+        images: [
+            sudhaBrochureV2,
+            'https://images.unsplash.com/photo-1558655146-9f40138edfeb?q=80&w=1000',
+            'https://images.unsplash.com/photo-1551818255-e6e10975bc17?q=80&w=1000'
+        ],
         logo: sudhaLogoV2,
         logoAlt: 'Sudha Analyticals Logo',
         pill: 'brochure  •  poster  •  leaflets  •  visiting card',
-        type: 'single'
+        type: 'gallery'
     },
     {
         id: 'photoshoot',
@@ -40,16 +48,20 @@ const servicesData = [
         logo: alley91LogoV2,
         logoAlt: "Alley Photo shoot",
         pill: 'photography  •  event  •  branding',
-        type: 'grid'
+        type: 'gallery'
     },
     {
         id: 'summer-green',
         subtitle: 'print, media, design',
-        image: summerGreenResortV2,
+        images: [
+            summerGreenResortV2,
+            'https://images.unsplash.com/photo-1551434678-e076c223a692?q=80&w=1000',
+            'https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=80&w=1000'
+        ],
         logo: summerGreenLogoV2,
         logoAlt: 'Summer Green Resort Logo',
         pill: 'print  •  media  •  design',
-        type: 'single'
+        type: 'gallery'
     }
 ];
 
@@ -59,6 +71,7 @@ const ServicesShowcase = () => {
     const [direction, setDirection] = useState(null);
     const [isAnimating, setIsAnimating] = useState(false);
     const [showPopup, setShowPopup] = useState(false);
+    const [imageIndex, setImageIndex] = useState(0); // Track current image within service
 
     // Refs for state access inside event listeners
     const activeIndexRef = useRef(0);
@@ -78,7 +91,34 @@ const ServicesShowcase = () => {
         isAnimatingRef.current = isAnimating;
     }, [isAnimating]);
 
+    // Handlers for BUTTON navigation (cycle images within current service)
     const handleNext = useCallback(() => {
+        if (isAnimatingRef.current) return;
+        
+        const currentService = servicesData[activeIndexRef.current];
+        
+        // Only cycle through images within the current service, don't switch cards
+        if (currentService.images) {
+            setImageIndex(prev => (prev + 1) % currentService.images.length);
+        }
+    }, []);
+
+    const handlePrev = useCallback(() => {
+        if (isAnimatingRef.current) return;
+        
+        const currentService = servicesData[activeIndexRef.current];
+        
+        // Only cycle through images within the current service, don't switch cards
+        if (currentService.images) {
+            setImageIndex(prev => {
+                const newIndex = prev - 1;
+                return newIndex < 0 ? currentService.images.length - 1 : newIndex;
+            });
+        }
+    }, []);
+    
+    // Handlers for SCROLL/SWIPE navigation (switch between service cards)
+    const handleNextService = useCallback(() => {
         if (isAnimatingRef.current) return;
         if (activeIndexRef.current >= servicesData.length - 1) return;
 
@@ -88,7 +128,7 @@ const ServicesShowcase = () => {
         setActiveIndex((prev) => prev + 1);
     }, []);
 
-    const handlePrev = useCallback(() => {
+    const handlePrevService = useCallback(() => {
         if (isAnimatingRef.current) return;
         if (activeIndexRef.current <= 0) return;
 
@@ -108,6 +148,11 @@ const ServicesShowcase = () => {
             return () => clearTimeout(timer);
         }
     }, [isAnimating]);
+    
+    // Reset image index when service changes (via scroll/swipe)
+    useEffect(() => {
+        setImageIndex(0);
+    }, [activeIndex]);
 
     // Touch Start Handler (passive is fine here, we just need start coords)
     const handleTouchStart = (e) => {
@@ -155,10 +200,10 @@ const ServicesShowcase = () => {
             // Prevent default page scroll
             if (e.cancelable) e.preventDefault();
 
-            // Trigger navigation (debounce could be added if needed, but simple check works)
+            // Trigger service navigation for scroll/swipe (not image cycling)
             if (Math.abs(e.deltaY) > 10) {
-                if (isScrollingDown) handleNext();
-                else handlePrev();
+                if (isScrollingDown) handleNextService();
+                else handlePrevService();
             }
         };
 
@@ -199,9 +244,9 @@ const ServicesShowcase = () => {
 
             if (Math.abs(deltaY) > 40) { // Minimum swipe distance
                 if (isSwipingUp && currentIndex < servicesData.length - 1) {
-                    handleNext();
+                    handleNextService();
                 } else if (isSwipingDown && currentIndex > 0) {
-                    handlePrev();
+                    handlePrevService();
                 }
             }
         };
@@ -250,19 +295,9 @@ const ServicesShowcase = () => {
                         <div className="content-layer exit">
                             <h3 className="service-subtitle">{previousService.subtitle}</h3>
                             <div className="featured-work-container">
-                                {previousService.type === 'grid' ? (
-                                    <div className="work-grid-wrapper">
-                                        {previousService.images.map((img, index) => (
-                                            <div key={index} className="grid-item">
-                                                <img src={img} alt={`${previousService.subtitle} ${index + 1}`} className="featured-image-grid" />
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="work-image-wrapper">
-                                        <img src={previousService.image} alt={previousService.subtitle} className="featured-image" />
-                                    </div>
-                                )}
+                                <div className="work-image-wrapper">
+                                    <img src={previousService.images[0]} alt={`${previousService.subtitle}`} className="featured-image" />
+                                </div>
                                 <div className={`logo-display-static ${previousService.id}-logo`}>
                                     {previousService.logo && (
                                         <img src={previousService.logo} alt={previousService.logoAlt || 'Client logo'} className="client-logo" />
@@ -279,19 +314,9 @@ const ServicesShowcase = () => {
                     <div className={`content-layer ${isAnimating ? 'enter' : 'active'}`}>
                         <h3 className="service-subtitle">{currentService.subtitle}</h3>
                         <div className="featured-work-container">
-                            {currentService.type === 'grid' ? (
-                                <div className="work-grid-wrapper">
-                                    {currentService.images.map((img, index) => (
-                                        <div key={index} className="grid-item">
-                                            <img src={img} alt={`${currentService.subtitle} ${index + 1}`} className="featured-image-grid" />
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="work-image-wrapper">
-                                    <img src={currentService.image} alt={currentService.subtitle} className="featured-image" />
-                                </div>
-                            )}
+                            <div className="work-image-wrapper">
+                                <img src={currentService.images[imageIndex]} alt={`${currentService.subtitle} ${imageIndex + 1}`} className="featured-image" />
+                            </div>
                             <div className="logo-carousel-static">
                                 <button className="nav-arrow left" aria-label="Previous image" onClick={handlePrev}>
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"></polyline></svg>

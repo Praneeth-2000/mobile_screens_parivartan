@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import './PortfolioSection.css';
 import mobileMockup from '../../assets/images/Mobile.png';
 import mobileScrollImage from '../../assets/images/MobileImage.png';
+import image2 from '../../assets/images/image2.png';
+import image3 from '../../assets/images/image3.png';
 import accel1LogoV2 from '../../assets/images/accel1-logo-v2.png';
 import TestimonialPopup from './TestimonialPopup';
 import html5Logo from '../../assets/images/html5-logo.png';
@@ -10,6 +12,21 @@ import reactLogo from '../../assets/images/react-logo.png';
 
 const PortfolioSection = () => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    
+    // Array of images to cycle through
+    const portfolioImages = [mobileScrollImage, image2, image3];
+    
+    // Navigation handlers
+    const handlePrevious = (e) => {
+        e.stopPropagation(); // Prevent popup from opening
+        setCurrentImageIndex((prev) => (prev - 1 + portfolioImages.length) % portfolioImages.length);
+    };
+    
+    const handleNext = (e) => {
+        e.stopPropagation(); // Prevent popup from opening
+        setCurrentImageIndex((prev) => (prev + 1) % portfolioImages.length);
+    };
 
     return (
         <div className="portfolio-section">
@@ -21,16 +38,16 @@ const PortfolioSection = () => {
                 <div className="mobile-device-frame">
                     <img src={mobileMockup} alt="Mobile Frame" className="mobile-frame-img" />
                     <div className="mobile-screen-content">
-                        <img src={mobileScrollImage} alt="Project Screen" className="mobile-scroll-image" />
+                        <img src={portfolioImages[currentImageIndex]} alt="Project Screen" className="mobile-scroll-image" />
                     </div>
                 </div>
 
                 <div className="nav-arrows">
-                    <button className="arrow-btn">‹</button>
+                    <button className="arrow-btn" onClick={handlePrevious}>‹</button>
                     <span className="company-name">
                         <img src={accel1LogoV2} alt="ACCEL1" className="company-logo" />
                     </span>
-                    <button className="arrow-btn">›</button>
+                    <button className="arrow-btn" onClick={handleNext}>›</button>
                 </div>
             </div>
 
