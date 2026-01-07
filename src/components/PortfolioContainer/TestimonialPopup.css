@@ -52,9 +52,9 @@
 }
 
 .close-button {
-    position: absolute;
-    top: -20px;
-    right: 20px;
+    position: fixed; /* Changed from absolute to fixed */
+    top: 20px; /* Distance from top of screen */
+    right: 20px; /* Distance from right of screen */
     background: white;
     border: none;
     border-radius: 50%;
