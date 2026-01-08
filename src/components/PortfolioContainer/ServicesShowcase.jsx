@@ -77,6 +77,8 @@ const ServicesShowcase = () => {
     const activeIndexRef = useRef(0);
     const isAnimatingRef = useRef(false);
     const sectionRef = useRef(null);
+    const wheelDeltaAccumulatorRef = useRef(0);
+    const lastInteractionTimeRef = useRef(0);
 
     // Touch tracking
     const touchStartY = useRef(0);
@@ -94,9 +96,9 @@ const ServicesShowcase = () => {
     // Handlers for BUTTON navigation (cycle images within current service)
     const handleNext = useCallback(() => {
         if (isAnimatingRef.current) return;
-        
+
         const currentService = servicesData[activeIndexRef.current];
-        
+
         // Only cycle through images within the current service, don't switch cards
         if (currentService.images) {
             setImageIndex(prev => (prev + 1) % currentService.images.length);
@@ -105,9 +107,9 @@ const ServicesShowcase = () => {
 
     const handlePrev = useCallback(() => {
         if (isAnimatingRef.current) return;
-        
+
         const currentService = servicesData[activeIndexRef.current];
-        
+
         // Only cycle through images within the current service, don't switch cards
         if (currentService.images) {
             setImageIndex(prev => {
@@ -116,24 +118,32 @@ const ServicesShowcase = () => {
             });
         }
     }, []);
-    
+
     // Handlers for SCROLL/SWIPE navigation (switch between service cards)
     const handleNextService = useCallback(() => {
-        if (isAnimatingRef.current) return;
+        const now = Date.now();
+        if (isAnimatingRef.current || (now - lastInteractionTimeRef.current < 800)) return;
         if (activeIndexRef.current >= servicesData.length - 1) return;
 
+        isAnimatingRef.current = true;
+        lastInteractionTimeRef.current = now;
+        activeIndexRef.current += 1; // Immediate update
         setDirection('up');
-        setPrevIndex(activeIndexRef.current);
+        setPrevIndex(activeIndexRef.current - 1);
         setIsAnimating(true);
         setActiveIndex((prev) => prev + 1);
     }, []);
 
     const handlePrevService = useCallback(() => {
-        if (isAnimatingRef.current) return;
+        const now = Date.now();
+        if (isAnimatingRef.current || (now - lastInteractionTimeRef.current < 800)) return;
         if (activeIndexRef.current <= 0) return;
 
+        isAnimatingRef.current = true;
+        lastInteractionTimeRef.current = now;
+        activeIndexRef.current -= 1; // Immediate update
         setDirection('down');
-        setPrevIndex(activeIndexRef.current);
+        setPrevIndex(activeIndexRef.current + 1);
         setIsAnimating(true);
         setActiveIndex((prev) => prev - 1);
     }, []);
@@ -143,12 +153,13 @@ const ServicesShowcase = () => {
         if (isAnimating) {
             const timer = setTimeout(() => {
                 setIsAnimating(false);
+                isAnimatingRef.current = false;
                 setDirection(null);
             }, 600);
             return () => clearTimeout(timer);
         }
     }, [isAnimating]);
-    
+
     // Reset image index when service changes (via scroll/swipe)
     useEffect(() => {
         setImageIndex(0);
@@ -160,108 +171,150 @@ const ServicesShowcase = () => {
         touchStartX.current = e.touches[0].clientX;
     };
 
-    // The core logic for scroll locking and interaction
+    const isLockedRef = useRef(false);
+
+    // Intersection Observer for Locking
     useEffect(() => {
         const element = sectionRef.current;
         if (!element) return;
 
-        // Helper to check if component is centered in viewport
-        const isCenteredInViewport = () => {
-            const rect = element.getBoundingClientRect();
-            const viewportHeight = window.innerHeight;
-            const elementCenter = rect.top + rect.height / 2;
-            const viewportCenter = viewportHeight / 2;
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                const wasLocked = isLockedRef.current;
+                isLockedRef.current = entry.isIntersecting;
 
-            // Relaxed threshold: 30% of viewport height (easier to catch)
-            const threshold = viewportHeight * 0.3;
+                // Direction-aware entry: Set index if we just locked
+                if (entry.isIntersecting && !wasLocked) {
+                    const rect = entry.boundingClientRect;
 
-            // Also check if element effectively covers the main interaction area
-            // (Top is near or above top edge, Bottom is near or below bottom edge)
-            const coversScreen = rect.top <= viewportHeight * 0.2 && rect.bottom >= viewportHeight * 0.8;
+                    // Reset accumulator
+                    wheelDeltaAccumulatorRef.current = 0;
 
-            return Math.abs(elementCenter - viewportCenter) < threshold || coversScreen;
-        };
+                    // If the element's top is < -50, it's entering from bottom
+                    if (rect.top < -50) {
+                        const lastIndex = servicesData.length - 1;
+                        setActiveIndex(lastIndex);
+                        activeIndexRef.current = lastIndex;
+                    } else {
+                        setActiveIndex(0);
+                        activeIndexRef.current = 0;
+                    }
+                }
+            },
+            {
+                threshold: 0.8,
+                rootMargin: "-5% 0px -5% 0px"
+            }
+        );
 
-        const handleWheelNonPassive = (e) => {
-            if (!isCenteredInViewport()) return;
+        observer.observe(element);
+        return () => observer.disconnect();
+    }, []);
 
-            const isVerticalScroll = Math.abs(e.deltaY) > Math.abs(e.deltaX);
-            if (!isVerticalScroll) return;
+    // Window level wheel listener
+    useEffect(() => {
+        const onScroll = (e) => {
+            if (!isLockedRef.current) return;
+
+            const now = Date.now();
+            const isCoolingDown = (now - lastInteractionTimeRef.current) < 800;
+
+            if (isAnimatingRef.current || isCoolingDown) {
+                // While animating or cooling down, strictly block and discard
+                if (e.cancelable) e.preventDefault();
+                wheelDeltaAccumulatorRef.current = 0;
+                return;
+            }
 
             const currentIndex = activeIndexRef.current;
             const isScrollingDown = e.deltaY > 0;
             const isScrollingUp = e.deltaY < 0;
 
-            // Boundary checks
-            if (isScrollingDown && currentIndex >= servicesData.length - 1) return; // Release to page scroll
-            if (isScrollingUp && currentIndex <= 0) return; // Release to page scroll
+            // Handle Page Scroll Release at Boundaries (with a tiny threshold to prevent accidental jump)
+            const atBottomBoundary = currentIndex === servicesData.length - 1 && isScrollingDown;
+            const atTopBoundary = currentIndex === 0 && isScrollingUp;
 
-            // If we are here, we are interacting with the carousel
-            // Prevent default page scroll
-            if (e.cancelable) e.preventDefault();
-
-            // Trigger service navigation for scroll/swipe (not image cycling)
-            if (Math.abs(e.deltaY) > 10) {
-                if (isScrollingDown) handleNextService();
-                else handlePrevService();
+            if (atBottomBoundary || atTopBoundary) {
+                wheelDeltaAccumulatorRef.current = 0;
+                return; // Let the page scroll naturally
             }
-        };
 
-        const handleTouchMoveNonPassive = (e) => {
-            const touchY = e.touches[0].clientY;
-            const touchX = e.touches[0].clientX;
-            const deltaY = touchStartY.current - touchY; // Positive = swipe up (scroll down)
-            const deltaX = touchStartX.current - touchX;
-
-            // Directional Locking: Only care if mostly vertical swipe
-            if (Math.abs(deltaY) < Math.abs(deltaX) || Math.abs(deltaY) < 5) return;
-
-            if (!isCenteredInViewport()) return;
-
-            const currentIndex = activeIndexRef.current;
-            const isSwipingUp = deltaY > 0; // Finger moves up, content moves up (Next)
-            const isSwipingDown = deltaY < 0; // Finger moves down, content moves down (Prev)
-
-            // Boundary Checks
-            if (isSwipingUp && currentIndex >= servicesData.length - 1) return; // Release
-            if (isSwipingDown && currentIndex <= 0) return; // Release
-
-            // Lock scroll
+            // Lock and step
             if (e.cancelable) e.preventDefault();
-        };
 
-        const handleTouchEndNonPassive = (e) => {
-            if (!isCenteredInViewport()) return;
+            // Accumulate wheel delta
+            wheelDeltaAccumulatorRef.current += e.deltaY;
 
-            const touchEndY = e.changedTouches[0].clientY;
-            const deltaY = touchStartY.current - touchEndY;
-
-            // Only trigger if we prevented default (meaning we locked it), or just purely based on logic
-            // To be safe, re-check boundaries and magnitude
-            const currentIndex = activeIndexRef.current;
-            const isSwipingUp = deltaY > 0;
-            const isSwipingDown = deltaY < 0;
-
-            if (Math.abs(deltaY) > 40) { // Minimum swipe distance
-                if (isSwipingUp && currentIndex < servicesData.length - 1) {
+            // Higher threshold (50) for the initial "flick" to ensure intentionality
+            if (Math.abs(wheelDeltaAccumulatorRef.current) >= 50) {
+                if (wheelDeltaAccumulatorRef.current > 0) {
                     handleNextService();
-                } else if (isSwipingDown && currentIndex > 0) {
+                } else {
                     handlePrevService();
                 }
+                wheelDeltaAccumulatorRef.current = 0; // Reset immediately after triggering
             }
         };
 
-        element.addEventListener('wheel', handleWheelNonPassive, { passive: false });
-        element.addEventListener('touchmove', handleTouchMoveNonPassive, { passive: false });
-        // We use touchend to actually trigger the state change for swipes to feel natural
-        element.addEventListener('touchend', handleTouchEndNonPassive, { passive: false });
+        window.addEventListener('wheel', onScroll, { passive: false });
+        return () => window.removeEventListener('wheel', onScroll);
+    }, [handleNextService, handlePrevService]);
+
+    // Touch Move Handler for scroll locking
+    const handleTouchMove = (e) => {
+        if (!isLockedRef.current || isAnimatingRef.current) return;
+
+        const touchY = e.touches[0].clientY;
+        const touchX = e.touches[0].clientX;
+        const deltaY = touchStartY.current - touchY;
+        const deltaX = touchStartX.current - touchX;
+
+        // Directional Locking: Only care if mostly vertical swipe
+        if (Math.abs(deltaY) < Math.abs(deltaX) || Math.abs(deltaY) < 5) return;
+
+        const currentIndex = activeIndexRef.current;
+        const isSwipingUp = deltaY > 0;
+        const isSwipingDown = deltaY < 0;
+
+        // Boundary Checks for Release
+        const atBottomBoundary = currentIndex === servicesData.length - 1 && isSwipingUp;
+        const atTopBoundary = currentIndex === 0 && isSwipingDown;
+
+        if (!atBottomBoundary && !atTopBoundary) {
+            if (e.cancelable) e.preventDefault();
+        }
+    };
+
+    // Touch End Handler for triggering service change
+    const handleTouchEnd = (e) => {
+        if (!isLockedRef.current || isAnimatingRef.current) return;
+
+        const touchEndY = e.changedTouches[0].clientY;
+        const deltaY = touchStartY.current - touchEndY;
+        const currentIndex = activeIndexRef.current;
+
+        if (Math.abs(deltaY) > 40) { // Minimum swipe distance
+            if (deltaY > 0 && currentIndex < servicesData.length - 1) {
+                handleNextService();
+            } else if (deltaY < 0 && currentIndex > 0) {
+                handlePrevService();
+            }
+        }
+    };
+
+    // The core logic for scroll locking and interaction (Legacy effect removed)
+    useEffect(() => {
+        const element = sectionRef.current;
+        if (!element) return;
+
+        element.addEventListener('touchmove', handleTouchMove, { passive: false });
+        element.addEventListener('touchend', handleTouchEnd, { passive: false });
 
         return () => {
-            element.removeEventListener('wheel', handleWheelNonPassive);
-            element.removeEventListener('touchmove', handleTouchMoveNonPassive);
-            element.removeEventListener('touchend', handleTouchEndNonPassive);
+            element.removeEventListener('touchmove', handleTouchMove);
+            element.removeEventListener('touchend', handleTouchEnd);
         };
-    }, [handleNext, handlePrev]);
+    }, [handleNextService, handlePrevService]);
 
     const currentService = servicesData[activeIndex];
     const previousService = prevIndex !== null ? servicesData[prevIndex] : null;

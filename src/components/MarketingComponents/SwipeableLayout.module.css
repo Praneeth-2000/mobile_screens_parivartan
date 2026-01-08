@@ -1,19 +1,47 @@
-/* SwipeableLayout - Fixed Header/Footer with Swipeable Middle */
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Inter:wght@400;500;600&family=Mulish:wght@400&display=swap');
 
-/* Full page container */
-.pageContainer {
-  position: relative; /* Changed from fixed to participate in scroll flow */
+.pinnedWrapper {
+  width: 100%;
+  position: relative;
+}
+
+.pinnedContainer {
+  /* This will be our main container that matches pageContainer functionality */
+  position: relative;
   width: 100%;
   height: 100vh;
-  height: 100dvh; /* Dynamic viewport height for mobile browsers */
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   background-image: url('../../assets/images/CardBG.png');
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
-  overflow: hidden !important; /* Block all global scrolling */
+  overflow: hidden !important;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.pinnedContainer::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* Full page container */
+.pageContainer {
+  position: relative;
+  /* Changed from fixed to participate in scroll flow */
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  /* Dynamic viewport height for mobile browsers */
+  display: flex;
+  flex-direction: column;
+  background-image: url('../../assets/images/CardBG.png');
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden !important;
+  /* Block all global scrolling */
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -29,35 +57,37 @@
   position: absolute;
   left: 0;
   right: 0;
-  height: 80px; /* Height of fade effect */
-  z-index: 5; /* Below header/footer (z-index: 10) but above background */
-  pointer-events: none; /* Allow interactions through the gradient */
+  height: 80px;
+  /* Height of fade effect */
+  z-index: 5;
+  /* Below header/footer (z-index: 10) but above background */
+  pointer-events: none;
+  /* Allow interactions through the gradient */
 }
 
 /* Top fade - transparent to white */
 .pageContainer::before {
   top: 0;
-  background: linear-gradient(to bottom, 
-    rgba(255, 255, 255, 1) 0%, 
-    rgba(255, 255, 255, 0.8) 30%,
-    rgba(255, 255, 255, 0) 100%
-  );
+  background: linear-gradient(to bottom,
+      rgba(255, 255, 255, 1) 0%,
+      rgba(255, 255, 255, 0.8) 30%,
+      rgba(255, 255, 255, 0) 100%);
 }
 
 /* Bottom fade - transparent to white */
 .pageContainer::after {
   bottom: 0;
-  background: linear-gradient(to top, 
-    rgba(255, 255, 255, 1) 0%, 
-    rgba(255, 255, 255, 0.8) 30%,
-    rgba(255, 255, 255, 0) 100%
-  );
+  background: linear-gradient(to top,
+      rgba(255, 255, 255, 1) 0%,
+      rgba(255, 255, 255, 0.8) 30%,
+      rgba(255, 255, 255, 0) 100%);
 }
 
 /* FIXED HEADER */
 .fixedHeader {
   flex-shrink: 0;
-  padding: 60px 20px 10px; /* Increased top padding from 40px to 60px */
+  padding: 60px 20px 10px;
+  /* Increased top padding from 40px to 60px */
   text-align: center;
   background: transparent;
   z-index: 10;
@@ -70,7 +100,8 @@
 .heading {
   font-family: 'Caveat', cursive;
   font-weight: 500;
-  font-size: clamp(32px, 10vw, 48px); /* Scaled for 380px ref */
+  font-size: clamp(32px, 10vw, 48px);
+  /* Scaled for 380px ref */
   font-style: italic;
   line-height: 1.0;
   color: #000;
@@ -83,7 +114,8 @@
   width: 100%;
 }
 
-.line1, .line2 {
+.line1,
+.line2 {
   position: relative;
   z-index: 1;
   white-space: nowrap;
@@ -113,8 +145,10 @@
   flex: 1;
   min-height: 0;
   position: relative;
-  overflow: visible; /* Prevent any clipping of shadows or curves */
-  touch-action: none; /* Crucial for custom swipe detection */
+  overflow: visible;
+  /* Prevent any clipping of shadows or curves */
+  touch-action: pan-y;
+  /* Changed from none to allow browser boundary release */
   -webkit-user-select: none;
   user-select: none;
 }
@@ -131,15 +165,17 @@
   left: 0;
   width: 100%;
   height: 100%;
-  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-              opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1),
+    opacity 0.6s cubic-bezier(0.65, 0, 0.35, 1);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: clamp(5px, 2vh, 15px) 15px; /* Stripped padding */
+  padding: clamp(5px, 2vh, 15px) 15px;
+  /* Stripped padding */
   box-sizing: border-box;
-  overflow: visible; /* Allow jumbo shadows to bleed */
+  overflow: visible;
+  /* Allow jumbo shadows to bleed */
 }
 
 .card::-webkit-scrollbar {
@@ -158,7 +194,8 @@
 /* FIXED FOOTER */
 .fixedFooter {
   flex-shrink: 0;
-  padding: 5px 20px 30px; /* Increased bottom padding from 15px to 30px */
+  padding: 5px 20px 30px;
+  /* Increased bottom padding from 15px to 30px */
   text-align: center;
   background: transparent;
   z-index: 10;
@@ -175,7 +212,8 @@
 
 .footerLine:last-child {
   margin-bottom: 0;
-  padding-bottom: 10px; /* Added padding below "& promote you using" line */
+  padding-bottom: 10px;
+  /* Added padding below "& promote you using" line */
 }
 
 .footerText {
@@ -212,7 +250,7 @@
     font-size: 15px;
     max-width: 360px;
   }
-  
+
   .footerText {
     font-size: 24px;
   }
@@ -220,26 +258,28 @@
 
 @media (min-width: 768px) {
   .fixedHeader {
-    padding: 20px 30px 10px; /* Reduced from 40px/20px */
+    padding: 20px 30px 10px;
+    /* Reduced from 40px/20px */
   }
-  
+
   .description {
     font-size: 17px;
     max-width: 480px;
   }
-  
+
   .footerText {
     font-size: 28px;
   }
-  
+
   .pagination {
     right: 20px;
     gap: 12px;
   }
-  
+
   .card {
     justify-content: center;
-    padding: clamp(10px, 3vh, 40px) 15px; /* Extremely compact for tablets */
+    padding: clamp(10px, 3vh, 40px) 15px;
+    /* Extremely compact for tablets */
   }
 }
 

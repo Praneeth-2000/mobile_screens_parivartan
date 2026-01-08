@@ -61,16 +61,20 @@
 .showcase-content-fixed {
     position: relative;
     width: 100%;
-    min-height: 600px; /* Increased from 550px to 600px to prevent button cutoff */
+    min-height: 600px;
+    /* Increased from 550px to 600px to prevent button cutoff */
     margin-top: 5px;
     overflow: visible;
-    padding-bottom: 20px; /* Added padding to ensure button has space */
+    padding-bottom: 20px;
+    /* Added padding to ensure button has space */
 }
 
 .service-content-wrapper {
     position: relative;
     width: 100%;
     height: 100%;
+    /* Added perspective for 3D scale effects */
+    perspective: 1500px;
 }
 
 .content-layer {
@@ -81,56 +85,87 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.5s ease;
+    /* Smoother Quintic easing and opacity sync */
+    transition:
+        transform 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .content-layer.active {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
+    z-index: 2;
+}
+
+/* Staggered Children Animations */
+.content-layer.enter .service-subtitle {
+    transition-delay: 0.1s;
+    animation-delay: 0.1s;
+}
+
+.content-layer.enter .featured-work-container {
+    transition-delay: 0.2s;
+    animation-delay: 0.2s;
+}
+
+.content-layer.enter .services-pill-bar {
+    transition-delay: 0.3s;
+    animation-delay: 0.3s;
+}
+
+.content-layer.enter .explore-button {
+    transition-delay: 0.4s;
+    animation-delay: 0.4s;
 }
 
 /* Enter/Exit States for Up Swipe (Next) */
 .animating-up .content-layer.exit {
-    transform: translateY(-100%);
+    transform: translateY(-80px) scale(0.9);
     opacity: 0;
+    z-index: 1;
 }
 
 .animating-up .content-layer.enter {
-    transform: translateY(100%);
-    animation: slideUpEnter 0.6s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+    transform: translateY(120px) scale(0.85);
+    opacity: 0;
+    z-index: 3;
+    animation: slideUpEnter 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 @keyframes slideUpEnter {
     from {
-        transform: translateY(100%);
+        transform: translateY(120px) scale(0.85);
         opacity: 0;
     }
 
     to {
-        transform: translateY(0);
-        opacity: 1; 
+        transform: translateY(0) scale(1);
+        opacity: 1;
     }
 }
 
 /* Enter/Exit States for Down Swipe (Prev) */
 .animating-down .content-layer.exit {
-    transform: translateY(100%);
+    transform: translateY(80px) scale(0.9);
     opacity: 0;
+    z-index: 1;
 }
 
 .animating-down .content-layer.enter {
-    transform: translateY(-100%);
-    animation: slideDownEnter 0.6s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+    transform: translateY(-120px) scale(0.85);
+    opacity: 0;
+    z-index: 3;
+    animation: slideDownEnter 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 @keyframes slideDownEnter {
     from {
-        transform: translateY(-100%);
+        transform: translateY(-120px) scale(0.85);
         opacity: 0;
     }
 
     to {
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
         opacity: 1;
     }
 }
@@ -283,7 +318,8 @@
     font-size: 14px;
     font-weight: 500;
     margin-top: 15px;
-    margin-bottom: 20px; /* Increased from 0px to 20px to prevent cutoff */
+    margin-bottom: 20px;
+    /* Increased from 0px to 20px to prevent cutoff */
     cursor: pointer;
     transition: transform 0.2s;
 }
