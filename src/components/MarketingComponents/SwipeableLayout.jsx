@@ -3,27 +3,27 @@ import styles from './SwipeableLayout.module.css';
 import { InstagramIcon, FacebookIcon, GoogleAdsIcon, MetaIcon } from '../common/Icons';
 
 // Import assets
-import underlineStroke from '../../assets/Vector76.svg';
 import emailMarketingLogo from '../../assets/logos/Email Marketing.png';
 
 const SwipeableLayout = ({ children }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const containerRef = useRef(null);
+
+  // Interaction Refs
   const touchStartY = useRef(0);
   const touchStartX = useRef(0);
   const touchEndY = useRef(0);
   const touchEndX = useRef(0);
-  
-  const childrenArray = React.Children.toArray(children);
-  const totalCards = childrenArray.length;
-  const minSwipeDistance = 50;
-  
+
   const currentIndexRef = useRef(0);
   const isTransitioningRef = useRef(false);
-  const swipeDirectionRef = useRef(null); // Track if user started swiping vertically
+  const wheelDeltaAccumulatorRef = useRef(0);
+  const lastInteractionTimeRef = useRef(0);
+  const lastBoundaryTimeRef = useRef(0); // For absorbing boundary inertia
+  const swipeDirectionRef = useRef(null); // Track vertical vs horizontal swipes
 
-  // Sync refs with state for use in event listeners
+  // Sync refs with state
   useEffect(() => {
     currentIndexRef.current = currentIndex;
   }, [currentIndex]);
@@ -31,108 +31,185 @@ const SwipeableLayout = ({ children }) => {
   useEffect(() => {
     isTransitioningRef.current = isTransitioning;
   }, [isTransitioning]);
-  
+
+  const childrenArray = React.Children.toArray(children);
+  const totalCards = childrenArray.length;
+  const minSwipeDistance = 50;
+
   const goToNext = useCallback(() => {
-    if (currentIndexRef.current < totalCards - 1 && !isTransitioningRef.current) {
+    const now = Date.now();
+    if (currentIndexRef.current < totalCards - 1 && !isTransitioningRef.current && (now - lastInteractionTimeRef.current > 800)) {
+      isTransitioningRef.current = true;
+      lastInteractionTimeRef.current = now;
+      currentIndexRef.current += 1;
       setIsTransitioning(true);
       setCurrentIndex(prev => prev + 1);
-      setTimeout(() => setIsTransitioning(false), 500);
+      setTimeout(() => {
+        setIsTransitioning(false);
+        isTransitioningRef.current = false;
+      }, 600);
     }
   }, [totalCards]);
-  
+
   const goToPrev = useCallback(() => {
-    if (currentIndexRef.current > 0 && !isTransitioningRef.current) {
+    const now = Date.now();
+    if (currentIndexRef.current > 0 && !isTransitioningRef.current && (now - lastInteractionTimeRef.current > 800)) {
+      isTransitioningRef.current = true;
+      lastInteractionTimeRef.current = now;
+      currentIndexRef.current -= 1;
       setIsTransitioning(true);
       setCurrentIndex(prev => prev - 1);
-      setTimeout(() => setIsTransitioning(false), 500);
+      setTimeout(() => {
+        setIsTransitioning(false);
+        isTransitioningRef.current = false;
+      }, 600);
     }
   }, []);
-  
-  // Helper to check if component is centered in viewport
-  const isCenteredInViewport = () => {
-    if (!containerRef.current) return false;
-    const rect = containerRef.current.getBoundingClientRect();
-    const viewportHeight = window.innerHeight;
-    
-    // Calculate centers
-    const viewportCenter = viewportHeight / 2;
-    const componentCenter = rect.top + rect.height / 2;
-    const distanceFromCenter = Math.abs(componentCenter - viewportCenter);
-    
-    // Component is centered when within 20% of viewport height
-    const centerThreshold = viewportHeight * 0.2;
-    return distanceFromCenter < centerThreshold;
-  };
 
+  const isLockedRef = useRef(false);
+
+  // Wheel Scroll Handler - The Core of the "Hard Lock"
+  useEffect(() => {
+    const onScroll = (e) => {
+      if (!isLockedRef.current) return;
+
+      const now = Date.now();
+      const isCoolingDown = (now - lastInteractionTimeRef.current) < 800;
+      const isBoundarySettle = (now - lastBoundaryTimeRef.current) < 300;
+
+      const currentIndex = currentIndexRef.current;
+      const isScrollingDown = e.deltaY > 0;
+      const isScrollingUp = e.deltaY < 0;
+
+      // Handle Page Scroll Release at Boundaries with "Settle" logic
+      const atBottomBoundary = currentIndex === totalCards - 1 && isScrollingDown;
+      const atTopBoundary = currentIndex === 0 && isScrollingUp;
+
+      if (atBottomBoundary || atTopBoundary) {
+        // If we just hit the boundary, keep the lock for 300ms to absorb inertia
+        if (isBoundarySettle) {
+          if (e.cancelable) e.preventDefault();
+          return;
+        }
+        wheelDeltaAccumulatorRef.current = 0;
+        return; // Allow natural page scroll after settle
+      }
+
+      // If we are NOT at a boundary, we MUST block the page scroll strictly
+      if (e.cancelable) e.preventDefault();
+
+      if (isTransitioningRef.current || isCoolingDown) {
+        wheelDeltaAccumulatorRef.current = 0;
+        return;
+      }
+
+      // 1. Reset accumulator if scroll direction changed (Sign change check)
+      if (wheelDeltaAccumulatorRef.current !== 0 && Math.sign(e.deltaY) !== Math.sign(wheelDeltaAccumulatorRef.current)) {
+        wheelDeltaAccumulatorRef.current = 0;
+      }
+
+      // 2. Accumulate delta
+      wheelDeltaAccumulatorRef.current += e.deltaY;
+
+      // 3. One deliberate step per gesture
+      if (Math.abs(wheelDeltaAccumulatorRef.current) >= 50) {
+        if (wheelDeltaAccumulatorRef.current > 0) {
+          goToNext();
+        } else {
+          goToPrev();
+        }
+
+        // If we just landed on a boundary card, start the settle timer
+        const newIndex = currentIndexRef.current;
+        if (newIndex === 0 || newIndex === totalCards - 1) {
+          lastBoundaryTimeRef.current = Date.now();
+        }
+
+        wheelDeltaAccumulatorRef.current = 0;
+      }
+    };
+
+    window.addEventListener('wheel', onScroll, { passive: false });
+    return () => window.removeEventListener('wheel', onScroll);
+  }, [goToNext, goToPrev, totalCards]);
+
+  // Intersection Observer for Locking with wider margin
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const wasLocked = isLockedRef.current;
+        isLockedRef.current = entry.isIntersecting;
+
+        if (entry.isIntersecting && !wasLocked) {
+          const rect = entry.boundingClientRect;
+          wheelDeltaAccumulatorRef.current = 0;
+          lastBoundaryTimeRef.current = 0; // Reset boundary settle on entry
+
+          // Direction-aware initialization
+          if (rect.top < -50) {
+            setCurrentIndex(totalCards - 1);
+            currentIndexRef.current = totalCards - 1;
+          } else {
+            setCurrentIndex(0);
+            currentIndexRef.current = 0;
+          }
+        }
+      },
+      {
+        threshold: 0,
+        rootMargin: "-40% 0px -40% 0px" // Robustly detects when component "crosses" screen center
+      }
+    );
+
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, [totalCards]);
+
+  // Touch Handlers - Re-implemented for Hard Lock
   const handleTouchStart = useCallback((e) => {
     touchStartY.current = e.touches[0].clientY;
     touchStartX.current = e.touches[0].clientX;
     touchEndY.current = e.touches[0].clientY;
     touchEndX.current = e.touches[0].clientX;
-    swipeDirectionRef.current = null; // Reset direction
+    swipeDirectionRef.current = null;
   }, []);
-  
+
   const handleTouchMove = useCallback((e) => {
-    if (!containerRef.current) return;
-    
-    const rect = containerRef.current.getBoundingClientRect();
-    const viewportHeight = window.innerHeight;
-    
-    // Calculate centers
-    const viewportCenter = viewportHeight / 2;
-    const componentCenter = rect.top + rect.height / 2;
-    const distanceFromCenter = Math.abs(componentCenter - viewportCenter);
-    
-    // Only capture when component is centered (within 20% of viewport height)
-    const centerThreshold = viewportHeight * 0.2;
-    const isCentered = distanceFromCenter < centerThreshold;
-    
-    if (!isCentered) return;
+    if (!isLockedRef.current) return;
 
-    const currentY = e.touches[0].clientY;  
+    const currentY = e.touches[0].clientY;
     const currentX = e.touches[0].clientX;
-    
-    // Calculate deltas from start
-    const totalDeltaY = Math.abs(touchStartY.current - currentY);
-    const totalDeltaX = Math.abs(touchStartX.current - currentX);
+    const totalDeltaY = touchStartY.current - currentY;
+    const totalDeltaX = touchStartX.current - currentX;
 
-    // Determine swipe direction early (after 8px movement)
-    if (swipeDirectionRef.current === null && (totalDeltaY > 8 || totalDeltaX > 8)) {
-      if (totalDeltaY > totalDeltaX * 1.2) {
-        swipeDirectionRef.current = 'vertical';
-      } else if (totalDeltaX > totalDeltaY * 1.2) {
-        swipeDirectionRef.current = 'horizontal';
-      }
+    // Filter for vertical swipes early
+    if (swipeDirectionRef.current === null && (Math.abs(totalDeltaY) > 8 || Math.abs(totalDeltaX) > 8)) {
+      swipeDirectionRef.current = Math.abs(totalDeltaY) > Math.abs(totalDeltaX) ? 'vertical' : 'horizontal';
     }
 
-    // Only handle vertical swipes
     if (swipeDirectionRef.current === 'vertical') {
-      const deltaY = touchStartY.current - currentY;
-      const isSwipingUp = deltaY > 0; // Going to next card (down the page)
-      const isSwipingDown = deltaY < 0; // Going to prev card (up the page)
+      const isSwipingUp = totalDeltaY > 0; // Next
+      const isSwipingDown = totalDeltaY < 0; // Prev
+      const currentIndex = currentIndexRef.current;
 
-      // Check if we're at boundaries
-      const atFirstCard = currentIndexRef.current === 0;
-      const atLastCard = currentIndexRef.current === totalCards - 1;
+      const atBoundary = (isSwipingUp && currentIndex === totalCards - 1) || (isSwipingDown && currentIndex === 0);
 
-      // Only prevent scroll if we have cards available in that direction
-      const canGoNext = isSwipingUp && !atLastCard;
-      const canGoPrev = isSwipingDown && !atFirstCard;
-
-      if (canGoNext || canGoPrev) {
-        // We can navigate - block page scroll
+      if (!atBoundary) {
+        // Firmly track and block native scroll while inside the showcase
         if (e.cancelable) e.preventDefault();
+      } else {
+        // Boundary behavior: can we release? 
+        // For touch, we usually allow the browser to take over once boundary is hit for a better feel
       }
-      // At boundary: if swiping up at last card OR swiping down at first card, allow scroll
-      // by not preventing default
     }
-    
+
     touchEndY.current = currentY;
     touchEndX.current = currentX;
   }, [totalCards]);
-  
+
   const handleTouchEnd = useCallback(() => {
-    // Only process if it was a vertical swipe
     if (swipeDirectionRef.current === 'vertical') {
       const swipeDistance = touchStartY.current - touchEndY.current;
       if (Math.abs(swipeDistance) > minSwipeDistance) {
@@ -143,70 +220,28 @@ const SwipeableLayout = ({ children }) => {
         }
       }
     }
-    
+
+    // Reset
     touchStartY.current = 0;
     touchEndY.current = 0;
     swipeDirectionRef.current = null;
   }, [goToNext, goToPrev]);
-  
-  const handleWheel = useCallback((e) => {
-    if (!containerRef.current) return;
-    
-    const rect = containerRef.current.getBoundingClientRect();
-    const viewportHeight = window.innerHeight;
-    
-    // Calculate centers
-    const viewportCenter = viewportHeight / 2;
-    const componentCenter = rect.top + rect.height / 2;
-    const distanceFromCenter = Math.abs(componentCenter - viewportCenter);
-    
-    // Only capture when component is centered (within 20% of viewport height)
-    const centerThreshold = viewportHeight * 0.2;
-    const isCentered = distanceFromCenter < centerThreshold;
-    
-    if (!isCentered) return;
-    
-    const isScrollingDown = e.deltaY > 0;
-    const isScrollingUp = e.deltaY < 0;
 
-    // Check if we're at boundaries
-    const atFirstCard = currentIndexRef.current === 0;
-    const atLastCard = currentIndexRef.current === totalCards - 1;
-
-    // Only prevent scroll if we have cards available in that direction
-    const canGoNext = isScrollingDown && !atLastCard;
-    const canGoPrev = isScrollingUp && !atFirstCard;
-
-    if (canGoNext || canGoPrev) {
-      // Intercept and prevent page scroll only if we can navigate
-      if (e.cancelable) e.preventDefault();
-      
-      // Navigate if not already transitioning and past sensitivity threshold
-      if (!isTransitioningRef.current && Math.abs(e.deltaY) > 5) {
-        if (isScrollingDown) goToNext();
-        else goToPrev();
-      }
-    }
-    // At boundary: allow scroll to continue by not preventing default
-  }, [goToNext, goToPrev, totalCards]);
-  
+  // Add event listeners to the component container
   useEffect(() => {
     const container = containerRef.current;
     if (container) {
-      // Use non-passive for wheel as well to ensure preventDefault() works
-      container.addEventListener('wheel', handleWheel, { passive: false });
       container.addEventListener('touchstart', handleTouchStart, { passive: false });
       container.addEventListener('touchmove', handleTouchMove, { passive: false });
       container.addEventListener('touchend', handleTouchEnd, { passive: false });
-      
+
       return () => {
-        container.removeEventListener('wheel', handleWheel);
         container.removeEventListener('touchstart', handleTouchStart);
         container.removeEventListener('touchmove', handleTouchMove);
         container.removeEventListener('touchend', handleTouchEnd);
       };
     }
-  }, [handleWheel, handleTouchStart, handleTouchMove, handleTouchEnd]);
+  }, [handleTouchStart, handleTouchMove, handleTouchEnd]);
 
   return (
     <div className={styles.pageContainer}>
@@ -216,7 +251,7 @@ const SwipeableLayout = ({ children }) => {
             <span className={styles.line1}>
               Visibility where your
               <svg className={styles.underlineImage} width="198" height="26" viewBox="0 0 198 26" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-                <path d="M0.752181 24.3648C24.2033 10.7729 96.3954 -10.9965 197.555 10.6615" stroke="#73BF44" strokeWidth="3"/>
+                <path d="M0.752181 24.3648C24.2033 10.7729 96.3954 -10.9965 197.555 10.6615" stroke="#73BF44" strokeWidth="3" />
               </svg>
             </span>
             <span className={styles.line2}>audience already is</span>
@@ -227,7 +262,7 @@ const SwipeableLayout = ({ children }) => {
         </p>
       </header>
 
-      <div 
+      <div
         className={styles.swipeArea}
         ref={containerRef}
       >
@@ -249,7 +284,6 @@ const SwipeableLayout = ({ children }) => {
             );
           })}
         </div>
-
       </div>
 
       <footer className={styles.fixedFooter}>
