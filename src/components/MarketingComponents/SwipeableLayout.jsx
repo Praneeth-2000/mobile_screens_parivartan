@@ -21,6 +21,7 @@ const SwipeableLayout = ({ children }) => {
   
   const currentIndexRef = useRef(0);
   const isTransitioningRef = useRef(false);
+  const swipeDirectionRef = useRef(null); // Track if user started swiping vertically
 
   // Sync refs with state for use in event listeners
   useEffect(() => {
@@ -69,6 +70,7 @@ const SwipeableLayout = ({ children }) => {
     touchStartX.current = e.touches[0].clientX;
     touchEndY.current = e.touches[0].clientY;
     touchEndX.current = e.touches[0].clientX;
+    swipeDirectionRef.current = null; // Reset direction
   }, []);
   
   const handleTouchMove = useCallback((e) => {
@@ -77,26 +79,42 @@ const SwipeableLayout = ({ children }) => {
     const rect = containerRef.current.getBoundingClientRect();
     const viewportHeight = window.innerHeight;
     
-    // "MAGNETIC" CAPTURE: Trigger if section is mostly in view or entering firmly
-    const isReached = rect.top <= viewportHeight * 0.2 && rect.bottom >= viewportHeight * 0.8;
+    // More lenient "MAGNETIC" CAPTURE - trigger when section is substantially visible
+    const isReached = rect.top <= viewportHeight * 0.3 && rect.bottom >= viewportHeight * 0.4;
     if (!isReached) return;
 
-    const currentY = e.touches[0].clientY;
+    const currentY = e.touches[0].clientY;  
     const currentX = e.touches[0].clientX;
-    const deltaY = touchStartY.current - currentY;
-    const deltaX = touchStartX.current - currentX;
+    
+    // Calculate deltas from start
+    const totalDeltaY = Math.abs(touchStartY.current - currentY);
+    const totalDeltaX = Math.abs(touchStartX.current - currentX);
 
-    // Strict vertical swipe check
-    if (Math.abs(deltaY) > Math.abs(deltaX)) {
-      const isSwipingUp = deltaY > 0; // Next
-      const isSwipingDown = deltaY < 0; // Prev
+    // Determine swipe direction early (after 8px movement)
+    if (swipeDirectionRef.current === null && (totalDeltaY > 8 || totalDeltaX > 8)) {
+      if (totalDeltaY > totalDeltaX * 1.2) {
+        swipeDirectionRef.current = 'vertical';
+      } else if (totalDeltaX > totalDeltaY * 1.2) {
+        swipeDirectionRef.current = 'horizontal';
+      }
+    }
 
-      // LOCK scroll if we have cards available in that direction
+    // Only handle vertical swipes
+    if (swipeDirectionRef.current === 'vertical') {
+      const deltaY = touchStartY.current - currentY;
+      const isSwipingUp = deltaY > 0; // Going to next card
+      const isSwipingDown = deltaY < 0; // Going to prev card
+
+      // Only prevent scroll if we have cards available in that direction
       const canGoNext = isSwipingUp && currentIndexRef.current < totalCards - 1;
       const canGoPrev = isSwipingDown && currentIndexRef.current > 0;
 
       if (canGoNext || canGoPrev) {
+        // We can navigate - block page scroll
         if (e.cancelable) e.preventDefault();
+      } else {
+        // At boundary - allow page scroll to continue
+        // Don't prevent default, let the swipe pass through
       }
     }
     
@@ -105,16 +123,21 @@ const SwipeableLayout = ({ children }) => {
   }, [totalCards]);
   
   const handleTouchEnd = useCallback(() => {
-    const swipeDistance = touchStartY.current - touchEndY.current;
-    if (Math.abs(swipeDistance) > minSwipeDistance) {
-      if (swipeDistance > 0) {
-        goToNext();
-      } else {
-        goToPrev();
+    // Only process if it was a vertical swipe
+    if (swipeDirectionRef.current === 'vertical') {
+      const swipeDistance = touchStartY.current - touchEndY.current;
+      if (Math.abs(swipeDistance) > minSwipeDistance) {
+        if (swipeDistance > 0) {
+          goToNext();
+        } else {
+          goToPrev();
+        }
       }
     }
+    
     touchStartY.current = 0;
     touchEndY.current = 0;
+    swipeDirectionRef.current = null;
   }, [goToNext, goToPrev]);
   
   const handleWheel = useCallback((e) => {
@@ -123,8 +146,8 @@ const SwipeableLayout = ({ children }) => {
     const rect = containerRef.current.getBoundingClientRect();
     const viewportHeight = window.innerHeight;
     
-    // Same "MAGNETIC" capture logic as touch
-    const isReached = rect.top <= viewportHeight * 0.2 && rect.bottom >= viewportHeight * 0.8;
+    // Same lenient "MAGNETIC" capture logic as touch
+    const isReached = rect.top <= viewportHeight * 0.3 && rect.bottom >= viewportHeight * 0.4;
     if (!isReached) return;
     
     const isScrollingDown = e.deltaY > 0;
@@ -135,7 +158,7 @@ const SwipeableLayout = ({ children }) => {
     const canGoPrev = isScrollingUp && currentIndexRef.current > 0;
 
     if (canGoNext || canGoPrev) {
-      // Intercept and prevent page scroll
+      // Intercept and prevent page scroll only if we can navigate
       if (e.cancelable) e.preventDefault();
       
       // Navigate if not already transitioning and past sensitivity threshold
@@ -144,6 +167,7 @@ const SwipeableLayout = ({ children }) => {
         else goToPrev();
       }
     }
+    // If at boundary (can't go next/prev), allow page scroll to continue
   }, [goToNext, goToPrev, totalCards]);
   
   useEffect(() => {
@@ -170,17 +194,16 @@ const SwipeableLayout = ({ children }) => {
         <div className={styles.headingBlock}>
           <h1 className={styles.heading}>
             <span className={styles.line1}>
-              get socially connected like
+              Visibility where your
               <svg className={styles.underlineImage} width="198" height="26" viewBox="0 0 198 26" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
                 <path d="M0.752181 24.3648C24.2033 10.7729 96.3954 -10.9965 197.555 10.6615" stroke="#73BF44" strokeWidth="3"/>
               </svg>
             </span>
-            <span className={styles.line2}>never before</span>
+            <span className={styles.line2}>audience already is</span>
           </h1>
         </div>
         <p className={styles.description}>
-          Through integrated digital marketing, email campaigns, and ad strategies, 
-          we help you grow your brand's voice across platforms.
+          By leveraging social media marketing, content strategy, and platform-specific storytelling, we assist brands in remaining relevant, consistent, and engaged across digital platforms.
         </p>
       </header>
 
