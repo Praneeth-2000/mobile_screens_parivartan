@@ -157,14 +157,45 @@
 /* Tech badges */
 .tech-stack {
     display: flex;
-    gap: 15px;
-    margin-bottom: 30px;
-    padding: 8px 20px;
+    margin-bottom: 40px;
+    padding: 15px 20px;
     border-radius: 25px;
     position: relative;
     justify-content: center;
     align-items: center;
     z-index: 1;
+    /* Match user's last edit */
+    width: 25%;
+    overflow: hidden;
+    background: rgba(115, 191, 68, 0.05);
+}
+
+.tech-track {
+    display: flex;
+    align-items: center;
+    /* Removed gap for mathematical loop perfection */
+    animation: scrollRight 3s linear infinite;
+    width: max-content;
+}
+
+.tech-badge {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-right: 30px;
+    /* Uniform spacing for perfect loop */
+}
+
+@keyframes scrollRight {
+    0% {
+        transform: translateX(-50%);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
 }
 
 .tech-stack::before {
@@ -183,7 +214,7 @@
 .tech-badge {
     display: flex;
     align-items: center;
-    gap: 8px;
+    flex-shrink: 0;
     font-size: 0.9rem;
     font-weight: 500;
 }

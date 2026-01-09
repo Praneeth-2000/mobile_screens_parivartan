@@ -1,10 +1,9 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import './PortfolioSection.css';
 import mobileMockup from '../assets/Mobile.png';
+import { techStackIcons } from '../assets/TechStackIcons';
 import TestimonialPopup from './TestimonialPopup';
-import html5Logo from '../assets/html5-logo.png';
-import pythonLogo from '../assets/python-logo.png';
-import reactLogo from '../assets/react-logo.png';
+
 
 // Extracted Data
 import { portfolioImages, portfolioLogos, getTestimonialData } from './PortfolioData';
@@ -152,14 +151,17 @@ const PortfolioSection = () => {
             </div>
 
             <div className="tech-stack">
-                <div className="tech-badge react">
-                    <img src={reactLogo} alt="React" className="tech-logo" />
-                </div>
-                <div className="tech-badge html">
-                    <img src={html5Logo} alt="HTML5" className="tech-logo" />
-                </div>
-                <div className="tech-badge python">
-                    <img src={pythonLogo} alt="Python" className="tech-logo" />
+                <div className="tech-track">
+                    {techStackIcons.map((icon, index) => (
+                        <div className="tech-badge" key={`tech-${index}`}>
+                            <img src={icon} alt={`Tech ${index}`} className="tech-logo" />
+                        </div>
+                    ))}
+                    {techStackIcons.map((icon, index) => (
+                        <div className="tech-badge" key={`tech-loop-${index}`}>
+                            <img src={icon} alt={`Tech ${index}`} className="tech-logo" />
+                        </div>
+                    ))}
                 </div>
             </div>
 
