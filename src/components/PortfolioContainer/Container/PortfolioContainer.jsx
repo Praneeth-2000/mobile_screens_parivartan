@@ -1,11 +1,11 @@
 import React from 'react';
-import PortfolioSection from './PortfolioSection';
-import SwipeableLayout from '../MarketingComponents/SwipeableLayout';
-import { DigitalMarketingCard } from '../MarketingComponents/DigitalMarketingCard';
-import { SeoCard } from '../MarketingComponents/SeoCard';
-import { AdCampaignsCard } from '../MarketingComponents/AdCampaignsCard';
-import { ReputationCard } from '../MarketingComponents/ReputationCard';
-import Background from '../HomeContainer/Background';
+import PortfolioSection from '../PortfolioSection/PortfolioSection';
+import SwipeableLayout from '../../MarketingComponents/SwipeableLayout';
+import { DigitalMarketingCard } from '../../MarketingComponents/DigitalMarketingCard';
+import { SeoCard } from '../../MarketingComponents/SeoCard';
+import { AdCampaignsCard } from '../../MarketingComponents/AdCampaignsCard';
+import { ReputationCard } from '../../MarketingComponents/ReputationCard';
+import Background from '../../HomeContainer/Background';
 import './PortfolioContainer.css';
 
 const PortfolioContainer = () => {

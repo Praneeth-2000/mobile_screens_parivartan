@@ -1,8 +1,12 @@
 import React from 'react';
 import './TestimonialPopup.css';
-import popCardImage from '../../assets/images/PopCard.png';
+import popCardImage from '../assets/PopCard.png';
 
-const TestimonialPopup = ({ onClose }) => {
+const TestimonialPopup = ({ onClose, content, title }) => {
+    // Default values if props are not provided
+    const displayContent = content || "Our collaboration with eparivartan has been nothing short of remarkable. Over the past six months, we have witnessed a significant enhancement in our branding efforts, a testament to the dedication and expertise of the eparivartan team.";
+    const displayTitle = title || "Sanjay Kommera - CEO";
+
     return (
         <div className="testimonial-popup-overlay" onClick={onClose}>
             <div className="testimonial-popup-content" onClick={(e) => e.stopPropagation()}>
@@ -20,10 +24,10 @@ const TestimonialPopup = ({ onClose }) => {
 
                         <div className="chat-bubble-text-content">
                             <p className="testimonial-text">
-Our collaboration with eparivartan has been nothing short of remarkable. Over the past six months, we have witnessed a significant enhancement in our branding efforts, a testament to the dedication and expertise of the eparivartan team.
+                                {displayContent}
                             </p>
                             <p className="testimonial-author">
-                                Sanjay Kommera - CEO
+                                {displayTitle}
                             </p>
                         </div>
                     </div>

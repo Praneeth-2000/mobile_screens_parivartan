@@ -1,15 +1,15 @@
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import './ExplorePopup.css';
-import andhraLogoV2 from '../../assets/images/andhra-logo-v2.png';
-import alley91Grid1V2 from '../../assets/images/alley91-grid-1-v2.png';
-import alley91Grid2V2 from '../../assets/images/alley91-grid-2-v2.png';
-import alley91Grid3V2 from '../../assets/images/alley91-grid-3-v2.png';
-import alley91Grid4V2 from '../../assets/images/alley91-grid-4-v2.png';
-import alley91Grid5V2 from '../../assets/images/alley91-grid-5-v2.png';
-import alley91Grid6V2 from '../../assets/images/alley91-grid-6-v2.png';
+import andhraLogoV2 from './assets/andhra-logo-v2.png';
+import alley91Grid1V2 from './assets/alley91-grid-1-v2.png';
+import alley91Grid2V2 from './assets/alley91-grid-2-v2.png';
+import alley91Grid3V2 from './assets/alley91-grid-3-v2.png';
+import alley91Grid4V2 from './assets/alley91-grid-4-v2.png';
+import alley91Grid5V2 from './assets/alley91-grid-5-v2.png';
+import alley91Grid6V2 from './assets/alley91-grid-6-v2.png';
 
-const ExplorePopup = ({ onClose }) => {
+const ExplorePopup = ({ onClose, logo, description, title }) => {
     // Lock body scroll on mount
     useEffect(() => {
         document.body.style.overflow = 'hidden';
@@ -24,6 +24,10 @@ const ExplorePopup = ({ onClose }) => {
     const storeBrandingImages = [alley91Grid1V2, alley91Grid2V2, alley91Grid3V2];
     const printCollateralImages = [alley91Grid4V2, alley91Grid5V2];
     const menuDesignImages = [alley91Grid6V2, alley91Grid1V2];
+
+    // Defaults for backward compatibility (ServicesShowcase)
+    const displayLogo = logo || andhraLogoV2;
+    const displayDesc = description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.";
 
     // Use React Portal to render at the document body level, ensuring it's on top of everything
     return ReactDOM.createPortal(
@@ -43,10 +47,10 @@ const ExplorePopup = ({ onClose }) => {
 
                     {/* Header */}
                     <div className="explore-header">
-                        <img src={andhraLogoV2} alt="Andhra Canteen" className="explore-logo" />
+                        <img src={displayLogo} alt={title || "Andhra Canteen"} className="explore-logo" />
+                        {title && <h2 style={{ fontSize: '2rem', marginBottom: '10px', color: '#333' }}>{title}</h2>}
                         <p className="explore-description">
-                            Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-                            Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.
+                            {displayDesc}
                         </p>
                     </div>
 

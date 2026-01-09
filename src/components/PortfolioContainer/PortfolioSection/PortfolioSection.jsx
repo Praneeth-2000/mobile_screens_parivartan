@@ -1,17 +1,13 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import './PortfolioSection.css';
-import mobileMockup from '../../assets/images/Mobile.png';
-import mobileScrollImage from '../../assets/images/MobileImage.png';
-import esticNew from '../../assets/images/Estic_Update.png';
-import sherwood from '../../assets/images/Sherwood_Update.png';
-import accel1LogoV2 from '../../assets/images/accel1-logo-v2.png';
+import mobileMockup from '../assets/Mobile.png';
 import TestimonialPopup from './TestimonialPopup';
-import html5Logo from '../../assets/images/html5-logo.png';
-import pythonLogo from '../../assets/images/python-logo.png';
-import reactLogo from '../../assets/images/react-logo.png';
+import html5Logo from '../assets/html5-logo.png';
+import pythonLogo from '../assets/python-logo.png';
+import reactLogo from '../assets/react-logo.png';
 
-import logo1 from '../../assets/images/logo_1.svg';
-import logo2 from '../../assets/images/logo_2.svg';
+// Extracted Data
+import { portfolioImages, portfolioLogos, getTestimonialData } from './PortfolioData';
 
 const PortfolioSection = () => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -52,21 +48,18 @@ const PortfolioSection = () => {
         return () => observer.disconnect();
     }, []);
 
-    // Array of images to cycle through
-    const portfolioImages = [mobileScrollImage, esticNew, sherwood];
-    const portfolioLogos = [accel1LogoV2, logo1, logo2];
     const totalItems = portfolioImages.length;
 
     // Navigation handlers
-    const handlePrevious = (e) => {
+    const handlePrevious = useCallback((e) => {
         if (e) e.stopPropagation();
         setCurrentImageIndex((prev) => (prev - 1 + totalItems) % totalItems);
-    };
+    }, [totalItems]);
 
-    const handleNext = (e) => {
+    const handleNext = useCallback((e) => {
         if (e) e.stopPropagation();
         setCurrentImageIndex((prev) => (prev + 1) % totalItems);
-    };
+    }, [totalItems]);
 
     // Touch Handlers (Simple Horizontal Swipe)
     const handleTouchStart = useCallback((e) => {
@@ -127,6 +120,8 @@ const PortfolioSection = () => {
             element.removeEventListener('touchend', handleTouchEnd);
         };
     }, [handleTouchStart, handleTouchMove, handleTouchEnd]);
+
+
 
     return (
         <div className="portfolio-section" ref={sectionRef}>
@@ -191,7 +186,12 @@ const PortfolioSection = () => {
             </div>
 
             {/* Testimonial Popup Component */}
-            {isPopupOpen && <TestimonialPopup onClose={() => setIsPopupOpen(false)} />}
+            {isPopupOpen && (
+                <TestimonialPopup
+                    onClose={() => setIsPopupOpen(false)}
+                    {...getTestimonialData(currentImageIndex)}
+                />
+            )}
         </div>
     );
 };

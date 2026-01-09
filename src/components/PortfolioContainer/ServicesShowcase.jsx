@@ -1,18 +1,18 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import './ServicesShowcase.css';
 import ExplorePopup from './ExplorePopup';
-import andhraLogoV2 from '../../assets/images/andhra-logo-v2.png';
-import sudhaLogoV2 from '../../assets/images/sudha-logo-v2.png';
-import alley91LogoV2 from '../../assets/images/alley91-logo-v2.png';
-import alley91Grid1V2 from '../../assets/images/alley91-grid-1-v2.png';
-import alley91Grid2V2 from '../../assets/images/alley91-grid-2-v2.png';
-import alley91Grid3V2 from '../../assets/images/alley91-grid-3-v2.png';
-import alley91Grid4V2 from '../../assets/images/alley91-grid-4-v2.png';
-import alley91Grid5V2 from '../../assets/images/alley91-grid-5-v2.png';
-import alley91Grid6V2 from '../../assets/images/alley91-grid-6-v2.png';
-import summerGreenLogoV2 from '../../assets/images/summer-green-logo-v2.png';
-import summerGreenResortV2 from '../../assets/images/summer-green-resort-v2.png';
-import sudhaBrochureV2 from '../../assets/images/sudha-brochure-v2.png';
+import andhraLogoV2 from './assets/andhra-logo-v2.png';
+import sudhaLogoV2 from './assets/sudha-logo-v2.png';
+import alley91LogoV2 from './assets/alley91-logo-v2.png';
+import alley91Grid1V2 from './assets/alley91-grid-1-v2.png';
+import alley91Grid2V2 from './assets/alley91-grid-2-v2.png';
+import alley91Grid3V2 from './assets/alley91-grid-3-v2.png';
+import alley91Grid4V2 from './assets/alley91-grid-4-v2.png';
+import alley91Grid5V2 from './assets/alley91-grid-5-v2.png';
+import alley91Grid6V2 from './assets/alley91-grid-6-v2.png';
+import summerGreenLogoV2 from './assets/summer-green-logo-v2.png';
+import summerGreenResortV2 from './assets/summer-green-resort-v2.png';
+import sudhaBrochureV2 from './assets/sudha-brochure-v2.png';
 
 const servicesData = [
     {
