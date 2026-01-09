@@ -10,11 +10,14 @@
   position: relative;
   width: 100%;
   min-height: 100vh;
-  min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
+  min-height: 100dvh;
+  /* Dynamic viewport height for mobile browsers */
   height: 100vh;
   height: 100dvh;
   display: flex;
   flex-direction: column;
+  background-color: #fce4ec;
+  /* Light pinkish fallback */
   background-image: url('../../assets/images/CardBG.png');
   background-size: 100% 100%;
   background-position: center;
@@ -38,6 +41,8 @@
   /* Dynamic viewport height for mobile browsers */
   display: flex;
   flex-direction: column;
+  background-color: #fce4ec;
+  /* Light pinkish fallback */
   background-image: url('../../assets/images/CardBG.png');
   background-size: 100% 100%;
   background-position: center;
