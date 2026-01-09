@@ -6,6 +6,10 @@
     align-items: center;
     position: relative;
     background: white;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    min-height: 100vh;
+    /* Ensure it takes up enough space to snap comfortably */
 }
 
 .portfolio-description {

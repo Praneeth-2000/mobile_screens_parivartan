@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import './PortfolioSection.css';
 import mobileMockup from '../../assets/images/Mobile.png';
 import mobileScrollImage from '../../assets/images/MobileImage.png';
-import esticMobile from '../../assets/images/EsticMobile.png';
-import heritageValleyMobile from '../../assets/images/HeritageValleyMobile.png';
+import esticNew from '../../assets/images/Estic_Update.png';
+import sherwood from '../../assets/images/Sherwood_Update.png';
 import accel1LogoV2 from '../../assets/images/accel1-logo-v2.png';
 import TestimonialPopup from './TestimonialPopup';
 import html5Logo from '../../assets/images/html5-logo.png';
@@ -17,16 +17,29 @@ const PortfolioSection = () => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const screenRef = React.useRef(null);
+    const sectionRef = React.useRef(null);
+
+    // Interaction Refs for Scroll Locking
+    // Interaction Refs for Scroll Locking
+    const currentIndexRef = React.useRef(0);
+    // Removed Scroll Lock refs as internal scrolling created conflicts
+
+    // Touch tracking
+    const touchStartY = React.useRef(0);
+    const touchStartX = React.useRef(0);
+    const touchEndY = React.useRef(0);
+    const swipeDirectionRef = React.useRef(null);
+
+    // Sync refs with state
+    useEffect(() => {
+        currentIndexRef.current = currentImageIndex;
+    }, [currentImageIndex]);
 
     React.useEffect(() => {
         const updateHeight = () => {
             if (screenRef.current) {
                 const height = screenRef.current.offsetHeight;
                 screenRef.current.style.setProperty('--viewport-height', `${height}px`);
-                // Assume safe bottom padding or use image aspect ratio logic if needed.
-                // For now, simpler: Scroll extent = Image Height - Viewport Height
-                // But we don't know image height easily without loading it. 
-                // Alternatively, assume the animation target is proportional.
             }
         };
 
@@ -40,22 +53,83 @@ const PortfolioSection = () => {
     }, []);
 
     // Array of images to cycle through
-    const portfolioImages = [mobileScrollImage, esticMobile, heritageValleyMobile];
+    const portfolioImages = [mobileScrollImage, esticNew, sherwood];
     const portfolioLogos = [accel1LogoV2, logo1, logo2];
+    const totalItems = portfolioImages.length;
 
     // Navigation handlers
     const handlePrevious = (e) => {
-        e.stopPropagation(); // Prevent popup from opening
-        setCurrentImageIndex((prev) => (prev - 1 + portfolioImages.length) % portfolioImages.length);
+        if (e) e.stopPropagation();
+        setCurrentImageIndex((prev) => (prev - 1 + totalItems) % totalItems);
     };
 
     const handleNext = (e) => {
-        e.stopPropagation(); // Prevent popup from opening
-        setCurrentImageIndex((prev) => (prev + 1) % portfolioImages.length);
+        if (e) e.stopPropagation();
+        setCurrentImageIndex((prev) => (prev + 1) % totalItems);
     };
 
+    // Touch Handlers (Simple Horizontal Swipe)
+    const handleTouchStart = useCallback((e) => {
+        touchStartY.current = e.touches[0].clientY;
+        touchStartX.current = e.touches[0].clientX;
+        touchEndY.current = e.touches[0].clientY;
+        swipeDirectionRef.current = null;
+    }, []);
+
+    const handleTouchMove = useCallback((e) => {
+        const currentY = e.touches[0].clientY;
+        const currentX = e.touches[0].clientX;
+        const totalDeltaY = touchStartY.current - currentY;
+        const totalDeltaX = touchStartX.current - currentX;
+
+        // Determine direction
+        if (swipeDirectionRef.current === null) {
+            if (Math.abs(totalDeltaX) > Math.abs(totalDeltaY)) {
+                swipeDirectionRef.current = 'horizontal';
+            } else {
+                swipeDirectionRef.current = 'vertical';
+            }
+        }
+
+        // If horizontal, prevent default to allow swipe
+        if (swipeDirectionRef.current === 'horizontal') {
+            if (e.cancelable) e.preventDefault();
+        }
+
+        touchEndY.current = currentY;
+    }, []);
+
+    const handleTouchEnd = useCallback((e) => {
+        if (swipeDirectionRef.current === 'horizontal') {
+            const swipeDistance = touchStartX.current - e.changedTouches[0].clientX; // Calculate horizontal dist
+            if (Math.abs(swipeDistance) > 50) {
+                if (swipeDistance > 0) {
+                    handleNext();
+                } else {
+                    handlePrevious();
+                }
+            }
+        }
+        swipeDirectionRef.current = null;
+    }, [handleNext, handlePrevious]);
+
+    useEffect(() => {
+        const element = sectionRef.current;
+        if (!element) return;
+
+        element.addEventListener('touchstart', handleTouchStart, { passive: false });
+        element.addEventListener('touchmove', handleTouchMove, { passive: false });
+        element.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+        return () => {
+            element.removeEventListener('touchstart', handleTouchStart);
+            element.removeEventListener('touchmove', handleTouchMove);
+            element.removeEventListener('touchend', handleTouchEnd);
+        };
+    }, [handleTouchStart, handleTouchMove, handleTouchEnd]);
+
     return (
-        <div className="portfolio-section">
+        <div className="portfolio-section" ref={sectionRef}>
             <p className="portfolio-description">
                 We design responsive, SEO-ready websites that form strong digital foundations, are aligned with business goals, are built for performance, and are ready to evolve as you grow.
             </p>
